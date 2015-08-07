@@ -43,6 +43,35 @@ https://libcloud.readthedocs.org/en/latest/compute/examples.html#create-an-opens
         'token': 'API_TOKEN',
     }
 
+*nodes*: This is where the virtual machines can be configured along with the
+labels. The ``labels`` key is crucial when configuring each node entry in this
+section because it allows the service to map the labels from the job that is
+stuck in the Jenkins queue to a configured node in this section. A single node
+might look like::
+
+
+    nodes = {
+        'precise-slave': {
+            'script': dedent("""#!/bin/bash
+            sudo apt-get update
+            """),
+            'keyname': 'jenkins-slave',
+            'image_name': 'Ubuntu Trusty (2014.04) cloudimg',
+            'size': 'm3.xlarge',
+            'labels': ['amd64', 'x86_64', 'precise', 'trusty', 'wheezy', 'jessie'],
+            'provider': 'openstack'
+        }
+    }
+
+The top-level keys is the name that will be used to register the machine in the
+cloud provider. The ``labels`` is a throwaway value that has no use for the
+cloud provider (only important to be able to map it to a jenkins job need).
+
+The ``provider`` key allows the system to understand that this should map to
+a configured provider backend.
+
+Again, this configuration section relies on Apache `LibCloud`_ , please refer to the
+compute examples to see what other keys can be used here and common values.
 
 About the name
 --------------
