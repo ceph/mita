@@ -1,5 +1,5 @@
 from pecan import expose
-from mita.controllers import node
+from mita.controllers import nodes
 
 
 class RootController(object):
@@ -8,5 +8,5 @@ class RootController(object):
     def index(self):
         return dict()
 
-    nodes = node.NodesController()
+    nodes = nodes.NodesController()
 
