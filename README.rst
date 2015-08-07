@@ -80,4 +80,4 @@ mechanism that mandated public service for all citizens that could perform
 labor. And thus, this service ensures that nodes will be up and running (and
 will later be terminated) to do some work.
 
-.. _LibCloud https://libcloud.readthedocs.org/en/latest/compute/
+.. _LibCloud: https://libcloud.readthedocs.org/en/latest/compute/
