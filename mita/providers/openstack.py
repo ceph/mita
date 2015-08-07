@@ -22,7 +22,7 @@ def get_driver():
         conf.provider.openstack.password,
         ex_force_auth_url=conf.provider.openstack.auth_url,
         ex_force_auth_version=conf.provider.openstack.auth_version,
-        ex_tenant_name=conf.provider.openstack.service_region,
+        ex_tenant_name=conf.provider.openstack.tenant_name,
         ex_force_service_region=conf.provider.openstack.service_region,
     )
     return driver
