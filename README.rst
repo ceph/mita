@@ -34,6 +34,15 @@ compute examples to see what other keys can be used here and common values:
 https://libcloud.readthedocs.org/en/latest/compute/examples.html#create-an-openstack-node-using-a-local-openstack-provider
 
 
+*jenkins*: The Jenkins section is very simple, it only requires three items:
+``url``, ``user``, and ``token``::
+
+    jenkins = {
+        'url': 'http://jenkins.ceph.com',
+        'user': 'alfredodeza',
+        'token': 'API_TOKEN',
+    }
+
 
 About the name
 --------------
