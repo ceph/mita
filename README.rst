@@ -73,6 +73,34 @@ a configured provider backend.
 Again, this configuration section relies on Apache `LibCloud`_ , please refer to the
 compute examples to see what other keys can be used here and common values.
 
+
+Unique IDs and Jenkins Slaves
+-----------------------------
+In order for the service to properly remove a Jenkins node after the inactivity
+grace period, it needs a way to map back to the provider. The Jenkins API does
+not provide information about a node that would make it unique, so we rely on
+a convention when naming the node.
+
+It is particularly important to follow this convention when more than one type
+of node will be created to cope with demand.
+
+For example, if a node named 'ubuntu' will have to exist more than once, the
+service will not be able to understand which one of all the 'ubuntu' nodes it
+needs to delete in the provider.
+
+The convention is to include one of the host's IP addresses onto the name when
+registering it in Jenkins with a '+' symbol.
+
+For example, a Jenkins slave, that exists with the name: "ubuntu+192.168.1.188"
+would allow to have as many 'ubuntu' slaves but uniquely identifiable with an
+IP that can be looked up on the provider's end to match it to the host.
+
+The service will first attempt to map on the name, and failing to do that it
+will try to use the IP to look it up.
+
+It is up to whatever is registering the node in Jenkins to use this convention
+if there is a chance of more than one host matching the same name.
+
 About the name
 --------------
 The ancient Inca empire didn't use any form of slavery and used a taxation
