@@ -41,6 +41,56 @@ def match_node_from_labels(labels, configured_nodes):
 
 @app.task
 def check_queue():
+    """
+    Specifically checks for the status of the Jenkins queue. The docs are
+    sparse here, but
+    ``jenkins/core/src/main/resources/hudson/model/queue/CauseOfBlockage`` has
+    the specific reasons this check needs::
+
+    *BecauseLabelIsBusy* Waiting for next available executor on {0}
+
+    *BecauseLabelIsOffline* All nodes of label \u2018{0}\u2019 are offline
+
+    *BecauseNodeIsBusy* Waiting for next available executor on {0}
+
+    *BecauseNodeIsOffline* {0} is offline
+
+    The distinction is the need for a label or a node. In the case of a node,
+    it will get matched directly to the nodes in the configuration, in case of a label
+    it will go through the configured nodes and pick the first matched to its labels.
+
+    Label needed example
+    --------------------
+    Jenkins queue reports that 'All nodes of label x86_64 are offline'. The
+    configuration has::
+
+        nodes: {
+            'centos6': {
+                ...
+                'labels': ['x86_64', 'centos', 'centos6']
+            }
+        }
+
+    Since 'x86_64' exists in the 'centos6' configured node, it will be sent off
+    to create that one.
+
+    Node needed example
+    -------------------
+    Jenkins reports that 'wheezy is offline'. The configuration has a few
+    labels configured::
+
+        nodes: {
+            'wheezy': {
+                ...
+            }
+            'centos6': {
+                ...
+            }
+        }
+
+    Since the key 'wheezy' matches the node required by the build system to
+    continue it goes off to create it.
+    """
     jenkins_url = app.conf.jenkins['url']
     jenkins_user = app.conf.jenkins['user']
     jenkins_token = app.conf.jenkins['token']
@@ -50,7 +100,7 @@ def check_queue():
         for task in result:
             if task['stuck']:
                 logger.info('found stuck task with name: %s' % task['task']['name'])
-                labels = infer_labels(task['task']['name'])
+                labels = infer_labels(task['why'])
                 logger.info('inferred labels as: %s' % str(labels))
                 node_name = match_node_from_labels(labels)
                 if node_name:
