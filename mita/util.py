@@ -20,8 +20,16 @@ def node_state_map():
 
 NodeState = node_state_map()
 
+
+def get_key(_dict, key, fallback=None):
+    if key in _dict:
+        return key
+    return fallback or None
+
 # TODO: all these need proper logging
 # Stuck Queue Processors
+
+
 def match_node(string):
     """
     Determine what node, if any, is needed from a given state of a Jenkins
@@ -47,18 +55,21 @@ def from_label(string):
 
         "Waiting for next available executor on {0}"
     """
-    node_or_label = string.split()[-1]
+    try:
+        node_or_label = string.split()[-1]
+    except IndexError:
+        return None
 
-    node = match_node_from_label(node_or_label)
-    configured_nodes = conf['nodes']
+    node_from_label = match_node_from_label(node_or_label)
+    configured_nodes = conf['nodes'].to_dict()
     # node_or_label can be a node as a key in the config, so try to get that
     # first, and use the match from labels as a fallback. Try first with no
     # sanitizing of the node name, and if that doesn't work, try by splitting
     # on possible use of '+IP'
-    match = configured_nodes.get(node_or_label, node)
+    match = get_key(configured_nodes, node_or_label) or get_key(configured_nodes, node_from_label)
     if match is None:
-        node_or_label = node_or_label.split('+')[0]
-        match = configured_nodes.get(node_or_label, node)
+        clean_node = node_or_label.split('+')[0]
+        match = get_key(configured_nodes, clean_node)
     return match
 
 
@@ -83,19 +94,19 @@ def from_offline_node(string):
         "{0} is offline"
     """
     node = string.split()[0]
-    configured_nodes = conf['nodes']
+    configured_nodes = conf['nodes'].to_dict()
     # node can be a node as a key in the config, so try to get that first. Try
     # first with no sanitizing of the node name, and if that doesn't work, try
     # by splitting on possible use of '+IP'
-    match = configured_nodes.get(node)
+    match = get_key(configured_nodes, node)
     if match is None:
         node = node.split('+')[0]
-        match = configured_nodes.get(node)
+        match = node if node in configured_nodes else None
     return match
 
 
 def match_node_from_label(label, configured_nodes=None):
-    configured_nodes = configured_nodes or conf['nodes']
+    configured_nodes = configured_nodes or conf['nodes'].to_dict()
     for node, metadata in configured_nodes.items():
         if label in metadata['labels']:
             return node
