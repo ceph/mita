@@ -1,10 +1,10 @@
 from pecan import make_app
-from mita import model
+from mita import models
 
 
 def setup_app(config):
 
-    model.init_model()
+    models.init_model()
     app_conf = dict(config.app)
 
     return make_app(
