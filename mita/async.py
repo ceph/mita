@@ -45,15 +45,15 @@ def check_queue():
     Specifically checks for the status of the Jenkins queue. The docs are
     sparse here, but
     ``jenkins/core/src/main/resources/hudson/model/queue/CauseOfBlockage`` has
-    the specific reasons this check needs::
+    the specific reasons this check needs:
 
-    *BecauseLabelIsBusy* Waiting for next available executor on {0}
+    * *BecauseLabelIsBusy* Waiting for next available executor on {0}
 
-    *BecauseLabelIsOffline* All nodes of label \u2018{0}\u2019 are offline
+    * *BecauseLabelIsOffline* All nodes of label \u2018{0}\u2019 are offline
 
-    *BecauseNodeIsBusy* Waiting for next available executor on {0}
+    * *BecauseNodeIsBusy* Waiting for next available executor on {0}
 
-    *BecauseNodeIsOffline* {0} is offline
+    * *BecauseNodeIsOffline* {0} is offline
 
     The distinction is the need for a label or a node. In the case of a node,
     it will get matched directly to the nodes in the configuration, in case of a label
