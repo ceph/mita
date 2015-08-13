@@ -94,15 +94,18 @@ def check_queue():
     jenkins_url = app.conf.jenkins['url']
     jenkins_user = app.conf.jenkins['user']
     jenkins_token = app.conf.jenkins['token']
+    print jenkins_url, jenkins_user, jenkins_token
     conn = jenkins.Jenkins(jenkins_url, jenkins_user, jenkins_token)
     result = conn.get_queue_info()
     if result:
         for task in result:
             if task['stuck']:
                 logger.info('found stuck task with name: %s' % task['task']['name'])
-                labels = infer_labels(task['why'])
-                logger.info('inferred labels as: %s' % str(labels))
-                node_name = match_node_from_labels(labels)
+                logger.info('reason was: %s' % task['why'])
+                #labels = infer_labels(task['why'])
+                node_name = util.match_node(task['why'])
+                logger.info('inferred node as: %s' % str(node_name))
+                #node_name = match_node_from_labels(labels)
                 if node_name:
                     logger.info('matched a node name to config: %s' % node_name)
                     # TODO: this should talk to the pecan app over HTTP using
@@ -122,4 +125,5 @@ app.conf.update(
     },
     nodes=pecan.conf.nodes,
     pecan_app=pecan.conf.server,
+    jenkins=pecan.conf.jenkins
 )
