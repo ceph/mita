@@ -137,17 +137,6 @@ def match_node_from_label(label, configured_nodes=None):
             return node
 
 
-# XXX we don't need these anymore, I think?
-def infer_labels(task_name):
-    """
-    Jenkins uses the job name mingled with labels, so this function trims the
-    string and sanitizes it so that clean labels can be consumed.
-    """
-    values = task_name.split(',')
-    labels = [v.split('=')[-1] for v in values]
-    return labels
-
-
 def match_node_from_labels(labels, configured_nodes=None):
     """
     Given a list of labels, map them to a configured node type so that it can
