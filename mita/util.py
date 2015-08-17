@@ -39,7 +39,8 @@ def match_node(string):
     busy_summary = lambda string: from_label if string.startswith('Waiting for') else None
     offline_label_summary = lambda string: from_offline_label if string.startswith('All nodes of label') else None
     offline_node_summary = lambda string: from_offline_node if string.endswith('is offline') else None
-    for summary in [busy_summary, offline_label_summary, offline_node_summary]:
+    offline_node_label_summary = lambda string: from_offline_node_label if string.startswith('There are no nodes') else None
+    for summary in [busy_summary, offline_label_summary, offline_node_summary, offline_node_label_summary]:
         processor = summary(string)
         if processor:
             return processor(string)
@@ -131,7 +132,8 @@ def from_offline_node(string):
 
 
 def match_node_from_label(label, configured_nodes=None):
-    configured_nodes = configured_nodes or conf['nodes'].to_dict()
+    configured_nodes = configured_nodes or get_nodes()
+    print type(configured_nodes)
     for node, metadata in configured_nodes.items():
         if label in metadata['labels']:
             return node
@@ -142,7 +144,8 @@ def match_node_from_labels(labels, configured_nodes=None):
     Given a list of labels, map them to a configured node type so that it can
     be created. All the labels must exist in the configured node
     """
-    configured_nodes = configured_nodes or conf['nodes'].to_dict()
+    configured_nodes = configured_nodes or get_nodes()
+
     def labels_exist(config):
         for l in labels:
             if l not in config:
@@ -152,3 +155,17 @@ def match_node_from_labels(labels, configured_nodes=None):
     for node, metadata in configured_nodes.items():
         if labels_exist(metadata['labels']):
             return node
+
+
+def get_nodes():
+    # Note:
+    # There is some odd side-effect of the pecan configuration where in
+    # production you can get a ``pecan.configuration.Config`` object but in
+    # tests you would get a ``pecan.configuration.ConfigDict``. The
+    # configuration loading seems to be the same but it has this problem.
+    # if/when this is fixed in how the celery portion of the apps loads the config then
+    # this should be removed.
+    try:
+        return conf['nodes'].to_dict()
+    except AttributeError:
+        return conf['nodes']
