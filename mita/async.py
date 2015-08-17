@@ -17,7 +17,7 @@ def get_pecan_config():
         return config_path
 
 
-pecan.configuration.set_config(get_pecan_config())
+pecan.configuration.set_config(get_pecan_config(), overwrite=True)
 app = Celery('mita.async', broker='amqp://guest@localhost//')
 
 
@@ -53,6 +53,7 @@ def check_queue():
 
     * *BecauseNodeIsBusy* Waiting for next available executor on {0}
 
+    * *BecauseNodeLabelIsOffline* There are no nodes with the label \u2018{0}\u2019
     * *BecauseNodeIsOffline* {0} is offline
 
     The distinction is the need for a label or a node. In the case of a node,
@@ -94,7 +95,6 @@ def check_queue():
     jenkins_url = app.conf.jenkins['url']
     jenkins_user = app.conf.jenkins['user']
     jenkins_token = app.conf.jenkins['token']
-    print jenkins_url, jenkins_user, jenkins_token
     conn = jenkins.Jenkins(jenkins_url, jenkins_user, jenkins_token)
     result = conn.get_queue_info()
     if result:
@@ -102,10 +102,8 @@ def check_queue():
             if task['stuck']:
                 logger.info('found stuck task with name: %s' % task['task']['name'])
                 logger.info('reason was: %s' % task['why'])
-                #labels = infer_labels(task['why'])
                 node_name = util.match_node(task['why'])
                 logger.info('inferred node as: %s' % str(node_name))
-                #node_name = match_node_from_labels(labels)
                 if node_name:
                     logger.info('matched a node name to config: %s' % node_name)
                     # TODO: this should talk to the pecan app over HTTP using
