@@ -5,6 +5,9 @@ BecauseNodeIsBusy = 'Waiting for next available executor on %s'
 BecauseLabelIsBusy = BecauseNodeIsBusy
 BecauseLabelIsOffline = u"All nodes of label \u2018%s\u2019 are offline"
 BecauseNodeIsOffline = "%s is offline"
+# this one is a dupe of `BecauseLabelIsOffline` in the code, but not the same
+# in logic
+BecauseNodeLabelIsOffline = u"There are no nodes with the label \u2018{0}\u2019"
 
 
 class TestFromLabel(object):
@@ -85,3 +88,28 @@ class TestOfflineNode(object):
     def test_matches_a_node(self):
         msg = BecauseNodeIsOffline % 'centos6'
         assert util.from_offline_node(msg) == 'centos6'
+
+
+class TestMatchNode(object):
+
+    def setup(self):
+        set_config(
+            {'nodes': {'wheezy': {'labels': ['amd64']}}},
+            overwrite=True
+        )
+
+    def test_busy_node(self):
+        result = util.match_node(BecauseNodeIsBusy % 'wheezy')
+        assert result == 'wheezy'
+
+    def test_busy_node_no_match(self):
+        result = util.match_node(BecauseNodeIsBusy % 'solaris')
+        assert result is None
+
+    def test_busy_label(self):
+        result = util.match_node(BecauseLabelIsBusy % 'amd64')
+        assert result == 'wheezy'
+
+    def test_busy_label_no_match(self):
+        result = util.match_node(BecauseLabelIsBusy % 'debian')
+        assert result is None
