@@ -15,7 +15,7 @@ class Node(Base):
     image_name = Column(String(128))
     size = Column(String(128))
 
-    def __init__(self, name, keyname, image_name, size, labels=None):
+    def __init__(self, name, keyname, image_name, size, labels=None, **kw):
         self.name = name
         self.keyname = keyname
         self.image_name = image_name
@@ -38,7 +38,7 @@ class Label(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(256), nullable=False, unique=True, index=True)
     node_id = Column(Integer, ForeignKey('nodes.id'))
-    node = relationship('node', backref=backref('labels', lazy='dynamic'))
+    node = relationship('Node', backref=backref('labels', lazy='dynamic'))
 
     def __init__(self, node, name):
         self.node = node
