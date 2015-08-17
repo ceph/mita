@@ -1,7 +1,9 @@
 import pecan
 from celery import Celery
 from datetime import timedelta
+import requests
 import jenkins
+import json
 import os
 import logging
 from mita import util
@@ -122,14 +124,34 @@ def check_queue():
                     #    that they are configured *incorrectly* and we should not
                     #    keep launching more, so log the warning and skip.
                     #    - now ask Jenkins about machines that have been idle
-                    #      for N (configurable) minutes, and see if match
+                    #      for N (configurable) minutes, and see if matches
                     #      a record in the DB for the characteristics that we are
                     #      being asked to create.
                     #      * if found/matched:
                     #        - log the warnings again, something is not working right.
-                    util.create_node(node_name, **pecan.conf.nodes[node_name])
+                    node_endpoint = get_mita_api('nodes')
+                    requests.post(node_endpoint, data=json.dumps(pecan.conf.nodes[node_name]))
                 else:
                     logger.warning('could not match a node name to config for labels')
+
+
+def get_mita_api(endpoint=None):
+    """
+    Puts together the API url for mita, so that we can talk to it. Optionally, the endpoint
+    argument allows to return the correct url for specific needs. For example, to create a node:
+
+        http://0.0.0.0/api/nodes/
+
+    """
+    server = pecan.conf['server']['host']
+    port = pecan.conf['server']['port']
+    base = "http://%s:%s/api" % (server, port)
+    endpoints = {
+        'nodes': '%s/nodes/' % base,
+    }
+    if endpoint:
+        return endpoints[endpoint]
+    return base
 
 
 app.conf.update(
