@@ -133,7 +133,6 @@ def from_offline_node(string):
 
 def match_node_from_label(label, configured_nodes=None):
     configured_nodes = configured_nodes or get_nodes()
-    print type(configured_nodes)
     for node, metadata in configured_nodes.items():
         if label in metadata['labels']:
             return node
