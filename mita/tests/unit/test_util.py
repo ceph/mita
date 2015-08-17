@@ -123,7 +123,7 @@ class TestMatchNode(object):
 
     def setup(self):
         set_config(
-            {'nodes': {'wheezy': {'labels': ['amd64']}}},
+            {'nodes': {'wheezy': {'labels': ['amd64', 'debian']}}},
             overwrite=True
         )
 
@@ -140,5 +140,17 @@ class TestMatchNode(object):
         assert result == 'wheezy'
 
     def test_busy_label_no_match(self):
-        result = util.match_node(BecauseLabelIsBusy % 'debian')
+        result = util.match_node(BecauseLabelIsBusy % 'x86_64')
+        assert result is None
+
+    def test_single_nodelabel_is_offline(self):
+        result = util.match_node(BecauseNodeLabelIsOffline % 'debian')
+        assert result == 'wheezy'
+
+    def test_multi_nodelabel_is_offline(self):
+        result = util.match_node(BecauseNodeLabelIsOffline % 'debian&&amd64')
+        assert result == 'wheezy'
+
+    def test_multi_nodelabel_is_offline_no_match(self):
+        result = util.match_node(BecauseNodeLabelIsOffline % 'fast&&debian&&amd64')
         assert result is None

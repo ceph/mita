@@ -54,6 +54,7 @@ def check_queue():
     * *BecauseNodeIsBusy* Waiting for next available executor on {0}
 
     * *BecauseNodeLabelIsOffline* There are no nodes with the label \u2018{0}\u2019
+
     * *BecauseNodeIsOffline* {0} is offline
 
     The distinction is the need for a label or a node. In the case of a node,
