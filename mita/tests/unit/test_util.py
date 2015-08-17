@@ -7,7 +7,7 @@ BecauseLabelIsOffline = u"All nodes of label \u2018%s\u2019 are offline"
 BecauseNodeIsOffline = "%s is offline"
 # this one is a dupe of `BecauseLabelIsOffline` in the code, but not the same
 # in logic
-BecauseNodeLabelIsOffline = u"There are no nodes with the label \u2018{0}\u2019"
+BecauseNodeLabelIsOffline = u"There are no nodes with the label \u2018%s\u2019"
 
 
 class TestFromLabel(object):
@@ -88,6 +88,35 @@ class TestOfflineNode(object):
     def test_matches_a_node(self):
         msg = BecauseNodeIsOffline % 'centos6'
         assert util.from_offline_node(msg) == 'centos6'
+
+
+class TestFromOfflineNodeLabel(object):
+
+    def setup(self):
+        set_config(
+            {'nodes': {'centos': {'labels': ['x86_64', 'centos', 'centos6']}}},
+            overwrite=True
+        )
+
+    def test_multiple_label_does_not_match(self):
+        msg = BecauseNodeLabelIsOffline % "x86_64&&rhel"
+        assert util.from_offline_node_label(msg) is None
+
+    def test_single_label_does_not_match(self):
+        msg = BecauseNodeLabelIsOffline % "rhel"
+        assert util.from_offline_node_label(msg) is None
+
+    def test_multiple_label_matches(self):
+        msg = BecauseNodeLabelIsOffline % "x86_64&&centos"
+        assert util.from_offline_node_label(msg) == 'centos'
+
+    def test_three_labels_matches(self):
+        msg = BecauseNodeLabelIsOffline % "x86_64&&centos&&centos6"
+        assert util.from_offline_node_label(msg) == 'centos'
+
+    def test_single_label_matches(self):
+        msg = BecauseNodeLabelIsOffline % "x86_64"
+        assert util.from_offline_node_label(msg) == 'centos'
 
 
 class TestMatchNode(object):
