@@ -28,7 +28,8 @@ def get_driver():
     return driver
 
 
-def create_node(name, **kw):
+def create_node(**kw):
+    name = kw['name']
     driver = get_driver()
     images = driver.list_images()
     sizes = driver.list_sizes()
