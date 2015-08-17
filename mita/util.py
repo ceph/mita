@@ -36,10 +36,11 @@ def match_node(string):
     Queue. There are three distinct states from the API, so process it and
     determine if we are able to match it to a configured node.
     """
-    busy_summary = lambda string: from_label if string.starswith('Waiting for') else None
-    offline_summary = lambda string: from_offline_label if string.starswith('All nodes of label') else None
-    offline_summary = lambda string: from_offline_node if string.endswith('is offline') else None
-    for processor in [busy_summary, offline_summary, offline_summary]:
+    busy_summary = lambda string: from_label if string.startswith('Waiting for') else None
+    offline_label_summary = lambda string: from_offline_label if string.startswith('All nodes of label') else None
+    offline_node_summary = lambda string: from_offline_node if string.endswith('is offline') else None
+    for summary in [busy_summary, offline_label_summary, offline_node_summary]:
+        processor = summary(string)
         if processor:
             return processor(string)
 
