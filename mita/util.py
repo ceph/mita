@@ -74,6 +74,30 @@ def from_label(string):
     return match
 
 
+def from_offline_node_label(string):
+    """
+    This is a bit difficult to process, with the configuration matrix labels
+    can show as: `label&&otherlabel`, which requires parsing to understand that
+    this is a possibility.
+    The behavior then, is to assume that we will get a clean label (just the
+    label and nothing else) and failing to do that, we must split by `&&` and
+    verify that all the labels in the resulting split are contained in
+    a configured host.
+
+    String to process::
+
+        u"There are no nodes with the label \u2018{0}\u2019"
+    """
+    to_remove = [u'\u2018', u'\u2019']
+    for i in to_remove:
+        string = string.replace(i, '')
+    label = string.split()[-1]
+    matched_node = match_node_from_label(label)
+    if matched_node is None:
+        matched_node = match_node_from_labels(label.split('&&'))
+    return matched_node
+
+
 def from_offline_label(string):
     """
     String to process::
@@ -124,11 +148,12 @@ def infer_labels(task_name):
     return labels
 
 
-def match_node_from_labels(labels, configured_nodes):
+def match_node_from_labels(labels, configured_nodes=None):
     """
     Given a list of labels, map them to a configured node type so that it can
     be created. All the labels must exist in the configured node
     """
+    configured_nodes = configured_nodes or conf['nodes'].to_dict()
     def labels_exist(config):
         for l in labels:
             if l not in config:
