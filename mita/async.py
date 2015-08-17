@@ -108,7 +108,25 @@ def check_queue():
                 if node_name:
                     logger.info('matched a node name to config: %s' % node_name)
                     # TODO: this should talk to the pecan app over HTTP using
-                    # the `app.conf.pecan_app` configuration entry
+                    # the `app.conf.pecan_app` configuration entry, and then follow this logic:
+                    # * got asked to create a new node -> check for an entry in the DB for a node that
+                    # matches the characteristics of it.
+                    #  * if there is one already:
+                    #    - check that if it has been running for more than N (configurable) minutes (defaults to 8):
+                    #      * if it has, it means that it is probable busy already, so:
+                    #        - create a new node in the cloud backend matching the characteristics needed
+                    #      * if it hasn't, it means that it is still getting provisioned so:
+                    #        - skip - do a log warning
+                    #  * if there is more than one, and it has been more than
+                    #    N (8) minutes since they got launched it is possible
+                    #    that they are configured *incorrectly* and we should not
+                    #    keep launching more, so log the warning and skip.
+                    #    - now ask Jenkins about machines that have been idle
+                    #      for N (configurable) minutes, and see if match
+                    #      a record in the DB for the characteristics that we are
+                    #      being asked to create.
+                    #      * if found/matched:
+                    #        - log the warnings again, something is not working right.
                     util.create_node(node_name, **pecan.conf.nodes[node_name])
                 else:
                     logger.warning('could not match a node name to config for labels')
