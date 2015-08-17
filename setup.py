@@ -16,6 +16,8 @@ setup(
         "pecan",
         'celery',
         'apache-libcloud',
+        'requests',
+        'psycopg2',
     ],
     test_suite='mita',
     zip_safe=False,
