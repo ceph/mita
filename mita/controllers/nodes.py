@@ -1,7 +1,10 @@
 from pecan import expose, abort, request
+import logging
 from mita.models import Node
 from mita import providers
 from mita.util import NodeState
+
+logger = logging.getLogger(__name__)
 
 
 class NodeController(object):
@@ -9,19 +12,6 @@ class NodeController(object):
     def __init__(self, node_name):
         self.node_name = node_name
         self.node = Node.query.filter_by(name=node_name).first()
-
-    @expose('json')
-    def create(self):
-        if request.method != 'POST':
-            abort(405)
-        provider = providers.get(request.json['provider'])
-        # create from the cloud provider
-        created_node = provider.create_node(**request.json)
-        # FIXME: this needs some unique name or identifier, maybe the mix
-        # of names and tags? We need to use the returned object to slap the ID
-        # into the database too
-        # create it in the database
-        Node(created_node, **request.json)
 
     # FIXME: validation is needed here
     @expose('json')
@@ -59,6 +49,23 @@ class NodeController(object):
 
 
 class NodesController(object):
+
+    @expose('json')
+    def index(self):
+        #if request.method != 'POST':
+        #    logger.warning('received unallowed HTTP method to create node: %s' % request.method)
+        #    abort(405)
+        provider = providers.get(request.json['provider'])
+        # create from the cloud provider
+        print request.json
+        logger.warning('creating node with details: %s' % str(request.json))
+        created_node = provider.create_node(**request.json)
+        # FIXME: this needs some unique name or identifier, maybe the mix
+        # of names and tags? We need to use the returned object to slap the ID
+        # into the database too
+        # create it in the database
+        #Node(created_node, **request.json)
+        Node(**request.json)
 
     @expose('json')
     def _lookup(self, node_name, *remainder):
