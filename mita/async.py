@@ -130,7 +130,9 @@ def check_queue():
                     #      * if found/matched:
                     #        - log the warnings again, something is not working right.
                     node_endpoint = get_mita_api('nodes')
-                    requests.post(node_endpoint, data=json.dumps(pecan.conf.nodes[node_name]))
+                    configured_node = pecan.conf.nodes[node_name]
+                    configured_node['name'] = node_name
+                    requests.post(node_endpoint, data=json.dumps(configured_node))
                 else:
                     logger.warning('could not match a node name to config for labels')
 
