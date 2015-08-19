@@ -52,20 +52,46 @@ class NodesController(object):
 
     @expose('json')
     def index(self):
-        #if request.method != 'POST':
-        #    logger.warning('received unallowed HTTP method to create node: %s' % request.method)
-        #    abort(405)
         provider = providers.get(request.json['provider'])
         # create from the cloud provider
-        print request.json
         logger.warning('creating node with details: %s' % str(request.json))
-        created_node = provider.create_node(**request.json)
-        # FIXME: this needs some unique name or identifier, maybe the mix
-        # of names and tags? We need to use the returned object to slap the ID
-        # into the database too
-        # create it in the database
-        #Node(created_node, **request.json)
-        Node(**request.json)
+
+        # Before creating a node, check if it has already been created by us:
+        name = request.json['name']
+        keyname = request.json['keyname']
+        image_name = request.json['image_name']
+        size = request.json['size']
+        labels = request.json['labels']
+        script = request.json['script']
+        existing_nodes = Node.filter_by(
+            name=name,
+            keyname=keyname,
+            image_name=image_name,
+            size=size,
+        ).all()
+
+        matching_nodes = [n for n in existing_nodes if n.labels_match(labels)]
+        if not matching_nodes:  # we don't have anything that matches this that has been ever created
+            logger.info('requested node does not exist, will create one')
+            # slap the UUID into the new node details
+            import uuid
+            _id = str(uuid.uuid4())
+            request.json['name'] = "%s+%s" % (name, _id)
+            # try to slap it into the script, it is not OK if we are not allowed to, assume we should
+            try:
+                request.json['script'] = script % _id
+            except TypeError:
+                logger.error('attempted to add a UUID to the script but failed')
+                logger.error('ensure that a formatting entry exists, like: %%s')
+                return  # do not add anything if we haven't been able to format
+            created_node = provider.create_node(**request.json)
+            # FIXME: this needs some unique name or identifier, maybe the mix
+            # of names and tags? We need to use the returned object to slap the ID
+            # into the database too
+            # create it in the database
+            #Node(created_node, **request.json)
+            request.json.pop('name')
+            Node(name=name, identifier=_id, node_obj=created_node, **request.json)
 
     @expose('json')
     def _lookup(self, node_name, *remainder):
