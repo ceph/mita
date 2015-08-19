@@ -3,6 +3,7 @@ from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.orm.exc import DetachedInstanceError
 from mita.models import Base
+from mita.models.types import ScalarListType
 
 
 class Node(Base):
@@ -14,16 +15,26 @@ class Node(Base):
     keyname = Column(String(128))
     image_name = Column(String(128))
     size = Column(String(128))
+    identifier = Column(String(128))
 
-    def __init__(self, name, keyname, image_name, size, labels=None, **kw):
+    def __init__(self, name, keyname, image_name, size, identifier, labels=None, **kw):
         self.name = name
         self.keyname = keyname
         self.image_name = image_name
         self.size = size
+        self.identifier = identifier
         self.created = datetime.datetime.utcnow()
-        if labels:
-            for l in labels:
-                Label(self, l)
+        self.labels = map(Label, labels)
+
+    def labels_match(self, labels):
+        """
+        Get a list of labels and see if this Node has them all
+        Returns a boolean
+        """
+        for l in self.labels:
+            if l.name not in labels:
+                return False
+        return True
 
     def __repr__(self):
         try:
