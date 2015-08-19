@@ -1,5 +1,8 @@
-from pecan import expose, abort, request
+from copy import deepcopy
 import logging
+import uuid
+
+from pecan import expose, abort, request
 from mita.models import Node
 from mita import providers
 from mita.util import NodeState
@@ -53,16 +56,17 @@ class NodesController(object):
     @expose('json')
     def index(self):
         provider = providers.get(request.json['provider'])
-        # create from the cloud provider
-        logger.warning('creating node with details: %s' % str(request.json))
+        # request.json is read-only, since we are going to add extra metadata
+        # to get the classes created, make a clean copy
+        _json = deepcopy(request.json)
 
         # Before creating a node, check if it has already been created by us:
-        name = request.json['name']
-        keyname = request.json['keyname']
-        image_name = request.json['image_name']
-        size = request.json['size']
-        labels = request.json['labels']
-        script = request.json['script']
+        name = _json['name']
+        keyname = _json['keyname']
+        image_name = _json['image_name']
+        size = _json['size']
+        labels = _json['labels']
+        script = _json['script']
         existing_nodes = Node.filter_by(
             name=name,
             keyname=keyname,
@@ -74,24 +78,25 @@ class NodesController(object):
         if not matching_nodes:  # we don't have anything that matches this that has been ever created
             logger.info('requested node does not exist, will create one')
             # slap the UUID into the new node details
-            import uuid
             _id = str(uuid.uuid4())
-            request.json['name'] = "%s+%s" % (name, _id)
+            logger.info('changing name: %s' % _json['name'])
+            _json['name'] = "%s__%s" % (name, _id)
+            logger.info('changed name into something else: %s' % _json['name'])
             # try to slap it into the script, it is not OK if we are not allowed to, assume we should
             try:
-                request.json['script'] = script % _id
+                _json['script'] = script % _id
             except TypeError:
                 logger.error('attempted to add a UUID to the script but failed')
                 logger.error('ensure that a formatting entry exists, like: %%s')
                 return  # do not add anything if we haven't been able to format
-            created_node = provider.create_node(**request.json)
-            # FIXME: this needs some unique name or identifier, maybe the mix
-            # of names and tags? We need to use the returned object to slap the ID
-            # into the database too
-            # create it in the database
-            #Node(created_node, **request.json)
-            request.json.pop('name')
-            Node(name=name, identifier=_id, node_obj=created_node, **request.json)
+            logger.warning('creating node with details: %s' % str(_json))
+            provider.create_node(**_json)
+            _json.pop('name')
+            Node(
+                name=request.json['name'],
+                identifier=_id,
+                **_json
+            )
 
     @expose('json')
     def _lookup(self, node_name, *remainder):
