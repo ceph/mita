@@ -40,11 +40,11 @@ class TestFromLabel(object):
         assert util.from_label(msg) == 'wheezy'
 
     def test_matches_node_with_plus_sign_from_name(self):
-        msg = BecauseNodeIsBusy % 'wheezy+192.168.1.12'
+        msg = BecauseNodeIsBusy % 'wheezy__192.168.1.12'
         assert util.from_label(msg) == 'wheezy'
 
     def test_no_match_with_plus_sign_from_name(self):
-        msg = BecauseNodeIsBusy % 'centos6+192.168.1.12'
+        msg = BecauseNodeIsBusy % 'centos6__192.168.1.12'
         assert util.from_label(msg) is None
 
 
@@ -82,7 +82,7 @@ class TestOfflineNode(object):
         assert util.from_offline_node(self.msg) is None
 
     def test_matches_a_node_with_plus_sign(self):
-        msg = BecauseNodeIsOffline % 'centos6+192.168.168.90'
+        msg = BecauseNodeIsOffline % 'centos6__192.168.168.90'
         assert util.from_offline_node(msg) == 'centos6'
 
     def test_matches_a_node(self):
