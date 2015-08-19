@@ -67,10 +67,10 @@ def from_label(string):
     # node_or_label can be a node as a key in the config, so try to get that
     # first, and use the match from labels as a fallback. Try first with no
     # sanitizing of the node name, and if that doesn't work, try by splitting
-    # on possible use of '+IP'
+    # on possible use of '__IP'
     match = get_key(configured_nodes, node_or_label) or get_key(configured_nodes, node_from_label)
     if match is None:
-        clean_node = node_or_label.split('+')[0]
+        clean_node = node_or_label.split('__')[0]
         match = get_key(configured_nodes, clean_node)
     return match
 
@@ -123,10 +123,10 @@ def from_offline_node(string):
     configured_nodes = conf['nodes'].to_dict()
     # node can be a node as a key in the config, so try to get that first. Try
     # first with no sanitizing of the node name, and if that doesn't work, try
-    # by splitting on possible use of '+IP'
+    # by splitting on possible use of __IP'
     match = get_key(configured_nodes, node)
     if match is None:
-        node = node.split('+')[0]
+        node = node.split('__')[0]
         match = node if node in configured_nodes else None
     return match
 
