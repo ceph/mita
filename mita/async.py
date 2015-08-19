@@ -100,6 +100,7 @@ def check_queue():
     jenkins_token = app.conf.jenkins['token']
     conn = jenkins.Jenkins(jenkins_url, jenkins_user, jenkins_token)
     result = conn.get_queue_info()
+
     if result:
         for task in result:
             if task['stuck']:
@@ -135,6 +136,12 @@ def check_queue():
                     requests.post(node_endpoint, data=json.dumps(configured_node))
                 else:
                     logger.warning('could not match a node name to config for labels')
+            else:
+                logger.info('no tasks where fund in "stuck" state')
+    elif result == []:
+        logger.info('the Jenkins queue is empty, nothing to do')
+    else:
+        logger.warning('attempted to get queue info but got: %s' % result)
 
 
 def get_mita_api(endpoint=None):
