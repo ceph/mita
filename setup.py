@@ -25,6 +25,6 @@ setup(
     packages=find_packages(exclude=['ez_setup']),
     entry_points="""
         [pecan.command]
-        celery=mita.commands.async:CeleryWorker
+        populate=mita.commands.populate:PopulateCommand
         """
 )
