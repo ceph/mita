@@ -3,19 +3,18 @@ from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.orm.exc import DetachedInstanceError
 from mita.models import Base
-from mita.models.types import ScalarListType
 
 
 class Node(Base):
 
     __tablename__ = 'nodes'
     id = Column(Integer, primary_key=True)
-    name = Column(String(256), nullable=False, unique=True, index=True)
+    name = Column(String(256), nullable=False, index=True)
     created = Column(DateTime, index=True)
     keyname = Column(String(128))
     image_name = Column(String(128))
     size = Column(String(128))
-    identifier = Column(String(128))
+    identifier = Column(String(128), nullable=False, unique=True, index=True)
 
     def __init__(self, name, keyname, image_name, size, identifier, labels=None, **kw):
         self.name = name
@@ -24,7 +23,9 @@ class Node(Base):
         self.size = size
         self.identifier = identifier
         self.created = datetime.datetime.utcnow()
-        self.labels = map(Label, labels)
+        if labels:
+            for l in labels:
+                Label(self, l)
 
     def labels_match(self, labels):
         """
