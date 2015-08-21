@@ -15,6 +15,7 @@ class Node(Base):
     image_name = Column(String(128))
     size = Column(String(128))
     identifier = Column(String(128), nullable=False, unique=True, index=True)
+    idle_since = Column(DateTime)
 
     def __init__(self, name, keyname, image_name, size, identifier, labels=None, **kw):
         self.name = name
@@ -23,6 +24,7 @@ class Node(Base):
         self.size = size
         self.identifier = identifier
         self.created = datetime.datetime.utcnow()
+        self.idle_since = None
         if labels:
             for l in labels:
                 Label(self, l)
@@ -37,6 +39,10 @@ class Node(Base):
                 return False
         return True
 
+    @property
+    def idle(self):
+        return bool(self.idle_since)
+
     def __repr__(self):
         try:
             return '<Node %r>' % self.name
@@ -48,7 +54,7 @@ class Label(Base):
 
     __tablename__ = 'labels'
     id = Column(Integer, primary_key=True)
-    name = Column(String(256), nullable=False, unique=True, index=True)
+    name = Column(String(256), nullable=False, index=True)
     node_id = Column(Integer, ForeignKey('nodes.id'))
     node = relationship('Node', backref=backref('labels', lazy='dynamic'))
 
