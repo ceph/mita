@@ -36,3 +36,17 @@ def create_node(**kw):
     size = [s for s in sizes if s.id == kw['size']][0]
     image = [i for i in images if i.name == kw['image_name']][0]
     driver.create_node(name=name, image=image, size=size, ex_userdata=kw['script'], ex_keyname=kw['keyname'])
+
+
+def destroy_node(**kw):
+    """
+    Relies on the fact that names **should be** unique. Along the chain we
+    prevent non-unique names to be used/added.
+    TODO: raise an exception if more than one node is matched to the name, that
+    can be propagated back to the client.
+    """
+    driver = get_driver()
+    name = kw['name']
+    nodes = driver.list_nodes()
+    node = [n for n in nodes if n.name == name][0]
+    driver.destroy_node(node)
