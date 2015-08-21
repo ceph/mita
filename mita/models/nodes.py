@@ -40,6 +40,10 @@ class Node(Base):
         return True
 
     @property
+    def cloud_name(self):
+        return u'%s__%s' % (self.name, self.identifier)
+
+    @property
     def idle(self):
         return bool(self.idle_since)
 
