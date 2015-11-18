@@ -1,5 +1,6 @@
 # {{ ansible_managed }}
 from prod_db import sqlalchemy
+from prod_jenkins import jenkins
 
 # Server Specific Configurations
 server = {
@@ -56,12 +57,6 @@ provider = {
         'service_region': 'OS1Public',
         'tenant_name': 'ceph-ci',
     }
-}
-
-jenkins = {
-    'url': '{{ jenkins_url }}',
-    'user': 'alfredodeza',
-    'token': 'XXXX',
 }
 
 nodes = {
