@@ -1,0 +1,16 @@
+---
+
+- hosts: all
+  user: vagrant
+  roles:
+    - common
+    - celery
+  vars:
+     app_name: "mita"
+     use_ssl: true
+     wsgi_file: wsgi.py
+     wsgi_callable: application
+     ansible_ssh_port: 22
+     restart_app: true
+     branch: "master"
+     development_server: true

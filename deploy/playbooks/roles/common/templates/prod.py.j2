@@ -1,0 +1,113 @@
+# {{ ansible_managed }}
+from pecan.hooks import TransactionHook
+from chacra import models
+from chacra import hooks
+from prod_db import sqlalchemy
+from prod_api_creds import api_key, api_user
+
+
+# Server Specific Configurations
+server = {
+    'port': '8000',
+    'host': '0.0.0.0'
+}
+
+# Pecan Application Configurations
+app = {
+    'root': 'chacra.controllers.root.RootController',
+    'modules': ['chacra'],
+    'guess_content_type_from_ext': False,
+    'hooks': [
+        TransactionHook(
+            models.start,
+            models.start_read_only,
+            models.commit,
+            models.rollback,
+            models.clear
+        ),
+        hooks.CustomErrorHook(),
+    ],
+    'debug': False,
+}
+
+logging = {
+    'loggers': {
+        'root': {'level': 'INFO', 'handlers': ['console']},
+        'chacra': {'level': 'DEBUG', 'handlers': ['console']},
+        'pecan': {'level': 'WARNING', 'handlers': ['console']},
+        'pecan.commands.serve': {'level': 'DEBUG', 'handlers': ['console']},
+        'py.warnings': {'handlers': ['console']},
+        '__force_dict__': True
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        }
+    },
+    'formatters': {
+        'simple': {
+            'format': ('%(asctime)s %(levelname)-5.5s [%(name)s]'
+                       '[%(threadName)s] %(message)s')
+        },
+        'color': {
+            '()': 'pecan.log.ColorFormatter',
+            'format': ('%(asctime)s [%(padded_color_levelname)s] [%(name)s]'
+                       '[%(threadName)s] %(message)s'),
+            '__force_dict__': True
+        }
+    }
+}
+
+# When True it will set the headers so that Nginx can serve the download
+# instead of Pecan.
+delegate_downloads = True
+
+# location for storing uploaded binaries
+binary_root = "{{ binary_root }}"
+repos_root = "{{ repos_root }}"
+distributions_root = "%(confdir)s/distributions"
+
+# Celery options
+# How often (in seconds) the database should be queried for repos that need to
+# be rebuilt
+polling_cycle = 60
+
+# Once a "create repo" task is called, how many seconds (if any) to wait before actually
+# creating the repository
+quiet_time = 20
+
+repos = {
+    'ceph': {
+        'all': {
+            'ceph-deploy': ['all'],
+            'radosgw-agent': ['all'],
+        },
+        'infernalis': {
+            'ceph-release': ['infernalis'],
+        },
+        'combined': ['wheezy', 'trusty', 'precise']
+   },
+    '__force_dict__': True,
+}
+
+
+# Use this to define how distributions files will be created per project
+distributions = {
+    "defaults": {
+        "DebIndices": "Packages Release . .gz .bz2",
+        "DscIndices": "Sources Release .gz .bz2",
+        "Contents": ".gz .bz2",
+        "Origin": "RedHat",
+        "Description": "",
+        "Architectures": "amd64 armhf i386 source",
+        "Suite": "stable",
+        "Components": "main",
+    },
+    "ceph": {
+        "Description": "Ceph distributed file system",
+    },
+}
+
+# production database configurations are imported from prod_db.py

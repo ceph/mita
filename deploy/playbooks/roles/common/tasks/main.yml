@@ -1,0 +1,77 @@
+---
+
+- name: "ensure a home for {{ app_name }}"
+  sudo: yes
+  file: path={{ app_home }} owner={{ ansible_ssh_user }} group={{ ansible_ssh_user }} state=directory recurse=yes
+  register: app_home_created
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+  sudo: yes
+
+- name: install ssl system requirements
+  sudo: yes
+  apt: name={{ item }} state=present
+  with_items: ssl_requirements
+  when: app_use_ssl
+  tags:
+    - packages
+
+- name: install system packages
+  sudo: yes
+  apt: name={{ item }} state=present
+  with_items: system_packages
+  tags:
+    - packages
+
+- name: Create a virtualenv with latest pip.
+  pip: name=pip virtualenv={{ app_home }} extra_args='--upgrade'
+
+- name: "pip+git install {{ app_name }} into virtualenv."
+  pip: name='git+https://github.com/alfredodeza/mita@{{ branch }}#egg=mita' virtualenv={{ app_home }}
+  changed_when: False
+
+- name: create the prod config file
+  action: template src=../templates/prod.py.j2 dest={{ app_home }}/src/{{ app_name }}/prod.py
+
+#- name: create the prod api credentials file
+#  template:
+#    src: prod_api_creds.py.j2
+#    dest: "{{ app_home }}/src/{{ app_name }}/prod_api_creds.py"
+#  when: (api_key is defined or api_user is defined) or
+#        (app_home_created is defined and app_home_created|changed)
+
+- name: install python requirements in virtualenv
+  pip:
+    requirements: "{{ app_home }}/src/{{ app_name }}/requirements.txt"
+    state: present
+    virtualenv: "{{ app_home }}"
+  notify: restart app
+
+- include: postgresql.yml
+  tags:
+    - postgres
+
+- include: circus.yml
+  tags:
+    - circus
+
+- include: nginx.yml
+  tags:
+    - nginx
+
+# nginx should be up and running by now, there is a bug with Ubuntu 14.04 and
+# nginx where nginx is using the old init scripts and the 'service' command
+# returns a zero exit code which ansible interprets as all being OK.
+
+- name: ensure nginx is running
+  sudo: true
+  action: service name=nginx state=started
+
+- name: ensure nginx was started and stayed up and running
+  sudo: true
+  action: service name=nginx state=started
+  register: nginx_was_running
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_release == 'trusty'
+  failed_when: nginx_was_running.changed
