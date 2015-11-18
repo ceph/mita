@@ -4,3 +4,4 @@ pecan
 sqlalchemy
 celery[librabbitmq]
 alembic
+python-jenkins
