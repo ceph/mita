@@ -1,6 +1,7 @@
 # {{ ansible_managed }}
 from prod_db import sqlalchemy
 from prod_jenkins import jenkins
+from prod_provider import provider
 
 # Server Specific Configurations
 server = {
@@ -48,16 +49,6 @@ logging = {
 
 from textwrap import dedent
 
-provider = {
-    'openstack': {
-        'username': 'adeza',
-        'password': 'XXXX',
-        'auth_url': 'http://os1-public.osop.rhcloud.com:5000',
-        'auth_version': '2.0_password',
-        'service_region': 'OS1Public',
-        'tenant_name': 'ceph-ci',
-    }
-}
 
 nodes = {
     'precise': {
