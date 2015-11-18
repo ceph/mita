@@ -29,7 +29,7 @@
   pip: name=pip virtualenv={{ app_home }} extra_args='--upgrade'
 
 - name: "pip+git install {{ app_name }} into virtualenv."
-  pip: name='git+https://github.com/alfredodeza/mita@{{ branch }}#egg=mita' virtualenv={{ app_home }}
+  pip: name='git+https://github.com/andrewschoen/mita@{{ branch }}#egg=mita' virtualenv={{ app_home }}
   changed_when: False
 
 - name: create the prod config file

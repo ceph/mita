@@ -14,3 +14,4 @@
      restart_app: true
      branch: "master"
      development_server: true
+     jenkins_server: "https://jenkins.ceph.com"
