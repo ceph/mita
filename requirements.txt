@@ -1,0 +1,6 @@
+psycopg2
+gunicorn
+pecan
+sqlalchemy
+celery[librabbitmq]
+alembic
