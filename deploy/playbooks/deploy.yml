@@ -13,4 +13,4 @@
      ansible_ssh_port: 2222
      branch: "master"
      development_server: false
-     jenkins_server: "https://jenkins.ceph.com"
+     jenkins_url: "https://jenkins.ceph.com"
