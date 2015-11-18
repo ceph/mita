@@ -1,10 +1,5 @@
 # {{ ansible_managed }}
-from pecan.hooks import TransactionHook
-from chacra import models
-from chacra import hooks
 from prod_db import sqlalchemy
-from prod_api_creds import api_key, api_user
-
 
 # Server Specific Configurations
 server = {
@@ -14,28 +9,18 @@ server = {
 
 # Pecan Application Configurations
 app = {
-    'root': 'chacra.controllers.root.RootController',
-    'modules': ['chacra'],
-    'guess_content_type_from_ext': False,
-    'hooks': [
-        TransactionHook(
-            models.start,
-            models.start_read_only,
-            models.commit,
-            models.rollback,
-            models.clear
-        ),
-        hooks.CustomErrorHook(),
-    ],
+    'root': 'mita.controllers.root.RootController',
+    'modules': ['mita'],
+    'static_root': '%(confdir)s/public',
+    'template_path': '%(confdir)s/mita/templates',
     'debug': False,
 }
 
 logging = {
+    'root': {'level': 'INFO', 'handlers': ['console']},
     'loggers': {
-        'root': {'level': 'INFO', 'handlers': ['console']},
-        'chacra': {'level': 'DEBUG', 'handlers': ['console']},
-        'pecan': {'level': 'WARNING', 'handlers': ['console']},
-        'pecan.commands.serve': {'level': 'DEBUG', 'handlers': ['console']},
+        'mita': {'level': 'DEBUG', 'handlers': ['console']},
+        'pecan': {'level': 'DEBUG', 'handlers': ['console']},
         'py.warnings': {'handlers': ['console']},
         '__force_dict__': True
     },
@@ -43,7 +28,7 @@ logging = {
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
-            'formatter': 'simple'
+            'formatter': 'color'
         }
     },
     'formatters': {
@@ -55,59 +40,97 @@ logging = {
             '()': 'pecan.log.ColorFormatter',
             'format': ('%(asctime)s [%(padded_color_levelname)s] [%(name)s]'
                        '[%(threadName)s] %(message)s'),
-            '__force_dict__': True
+        '__force_dict__': True
         }
     }
 }
 
-# When True it will set the headers so that Nginx can serve the download
-# instead of Pecan.
-delegate_downloads = True
+from textwrap import dedent
 
-# location for storing uploaded binaries
-binary_root = "{{ binary_root }}"
-repos_root = "{{ repos_root }}"
-distributions_root = "%(confdir)s/distributions"
-
-# Celery options
-# How often (in seconds) the database should be queried for repos that need to
-# be rebuilt
-polling_cycle = 60
-
-# Once a "create repo" task is called, how many seconds (if any) to wait before actually
-# creating the repository
-quiet_time = 20
-
-repos = {
-    'ceph': {
-        'all': {
-            'ceph-deploy': ['all'],
-            'radosgw-agent': ['all'],
-        },
-        'infernalis': {
-            'ceph-release': ['infernalis'],
-        },
-        'combined': ['wheezy', 'trusty', 'precise']
-   },
-    '__force_dict__': True,
+provider = {
+    'openstack': {
+        'username': 'adeza',
+        'password': 'XXXX',
+        'auth_url': 'http://os1-public.osop.rhcloud.com:5000',
+        'auth_version': '2.0_password',
+        'service_region': 'OS1Public',
+        'tenant_name': 'ceph-ci',
+    }
 }
 
-
-# Use this to define how distributions files will be created per project
-distributions = {
-    "defaults": {
-        "DebIndices": "Packages Release . .gz .bz2",
-        "DscIndices": "Sources Release .gz .bz2",
-        "Contents": ".gz .bz2",
-        "Origin": "RedHat",
-        "Description": "",
-        "Architectures": "amd64 armhf i386 source",
-        "Suite": "stable",
-        "Components": "main",
-    },
-    "ceph": {
-        "Description": "Ceph distributed file system",
-    },
+jenkins = {
+    'url': 'http://staging-jenkins.ceph.com',
+    'user': 'alfredodeza',
+    'token': 'XXXX',
 }
 
-# production database configurations are imported from prod_db.py
+nodes = {
+    'precise': {
+        'script': dedent("""#!/bin/bash
+        curl -L "http://172.18.181.11/setup/slave/?token=727999862a610c7436318580de6f3e27&executors=1&labels=amd64+precise+trusty+wheezy+jessie+x86_64&nodename=precise__%s" | bash
+        """),
+        'keyname': 'jenkins-build',
+        'image_name': 'Ubuntu Trusty (2014.04) cloudimg',
+        'size': 'c3.mxlarge',
+        'labels': ['amd64', 'x86_64', 'precise', 'trusty', 'wheezy', 'jessie'],
+        'provider': 'openstack'
+    },
+    'wheezy': {
+        'script': dedent("""#!/bin/bash
+        curl -L "http://172.18.181.11/setup/slave/?token=727999862a610c7436318580de6f3e27&executors=1&labels=amd64+precise+trusty+wheezy+jessie+x86_64&nodename=wheezy__%s" | bash
+        """),
+        'keyname': 'jenkins-build',
+        'image_name': 'Ubuntu Trusty (2014.04) cloudimg',
+        'size': 'c3.mxlarge',
+        'labels': ['amd64', 'x86_64', 'precise', 'trusty', 'wheezy', 'jessie'],
+        'provider': 'openstack'
+    },
+    'trusty': {
+        'script': dedent("""#!/bin/bash
+        curl -L "http://172.18.181.11/setup/slave/?token=727999862a610c7436318580de6f3e27&executors=1&labels=amd64+precise+trusty+wheezy+jessie+x86_64&nodename=trusty__%s" | bash
+        """),
+        'keyname': 'jenkins-build',
+        'image_name': 'Ubuntu Trusty (2014.04) cloudimg',
+        'size': 'c3.mxlarge',
+        'labels': ['amd64', 'x86_64', 'precise', 'trusty', 'wheezy', 'jessie'],
+        'provider': 'openstack'
+    },
+    'centos6': {
+        'script': dedent("""#!/bin/bash
+        curl -L "http://172.18.181.11/setup/slave/?token=727999862a610c7436318580de6f3e27&executors=2&labels=centos6.5+amd64+centos6+centos+centos6-pbuild+centos-pbuild+x86_64&nodename=centos6__%s" | bash"""),
+        'keyname': 'jenkins-build',
+        'image_name': 'centos-6.5-20140117.0.x86_64.qcow2',
+        'size': 'c3.mxlarge',
+        'labels': ['amd64', 'x86_64', 'centos', 'centos6', 'centos6.5'],
+        'provider': 'openstack'
+    },
+    'rhel6': {
+        'script': dedent("""#!/bin/bash
+        curl -L "http://172.18.181.11/setup/slave/?token=727999862a610c7436318580de6f3e27&executors=2&labels=rhel6.5+amd64+rhel6+rhel+rhel6-pbuild+rhel-pbuild+x86_64&nodename=rhel6__%s" | bash"""),
+        'keyname': 'jenkins-build',
+        'image_name': 'centos-6.5-20140117.0.x86_64.qcow2',
+        'size': 'c3.mxlarge',
+        'labels': ['amd64', 'x86_64', 'rhel6', 'rhel6.5'],
+        'provider': 'openstack'
+    },
+    'rhel7': {
+        'script': dedent("""#!/bin/bash
+        curl -L "http://172.18.181.11/setup/slave/?token=727999862a610c7436318580de6f3e27&executors=2&labels=amd64+rhel7+amd64+x86_64&nodename=rhel7__%s" | bash"""),
+        'keyname': 'jenkins-build',
+        'image_name': 'CentOS-7.1-x86_64-GenericCloud-1503',
+        'size': 'c3.mxlarge',
+        'labels': ['amd64', 'x86_64', 'rhel7'],
+        'provider': 'openstack'
+    },
+    'centos7': {
+        'script': dedent("""#!/bin/bash
+        curl -L "http://172.18.181.11/setup/slave/?token=727999862a610c7436318580de6f3e27&executors=2&labels=amd64+centos7+amd64+x86_64&nodename=centos7__%s" | bash"""),
+        'keyname': 'jenkins-build',
+        'image_name': 'CentOS-7.1-x86_64-GenericCloud-1503',
+        'size': 'm3.mxlarge',
+        'labels': ['amd64', 'x86_64', 'centos7'],
+        'provider': 'openstack'
+    },
+    '__force_dict__': True
+
+}
