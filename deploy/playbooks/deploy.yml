@@ -14,3 +14,4 @@
      branch: "master"
      development_server: false
      jenkins_url: "https://jenkins.ceph.com"
+     prado_url: "https://prado.ceph.com"

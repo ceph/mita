@@ -1,0 +1,73 @@
+from textwrap import dedent
+
+
+nodes = {
+    'precise': {
+        'script': dedent("""#!/bin/bash
+        curl -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+precise+trusty+wheezy+jessie+x86_64&nodename=precise__%s" | bash
+        """),
+        'keyname': 'jenkins-build',
+        'image_name': 'Ubuntu Trusty (2014.04) cloudimg',
+        'size': 'c3.mxlarge',
+        'labels': ['amd64', 'x86_64', 'precise', 'trusty', 'wheezy', 'jessie'],
+        'provider': 'openstack'
+    },
+    'wheezy': {
+        'script': dedent("""#!/bin/bash
+        curl -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+precise+trusty+wheezy+jessie+x86_64&nodename=wheezy__%s" | bash
+        """),
+        'keyname': 'jenkins-build',
+        'image_name': 'Ubuntu Trusty (2014.04) cloudimg',
+        'size': 'c3.mxlarge',
+        'labels': ['amd64', 'x86_64', 'precise', 'trusty', 'wheezy', 'jessie'],
+        'provider': 'openstack'
+    },
+    'trusty': {
+        'script': dedent("""#!/bin/bash
+        curl -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+precise+trusty+wheezy+jessie+x86_64&nodename=trusty__%s" | bash
+        """),
+        'keyname': 'jenkins-build',
+        'image_name': 'Ubuntu Trusty (2014.04) cloudimg',
+        'size': 'c3.mxlarge',
+        'labels': ['amd64', 'x86_64', 'precise', 'trusty', 'wheezy', 'jessie'],
+        'provider': 'openstack'
+    },
+    'centos6': {
+        'script': dedent("""#!/bin/bash
+        curl -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=2&labels=centos6.5+amd64+centos6+centos+centos6-pbuild+centos-pbuild+x86_64&nodename=centos6__%s" | bash"""),
+        'keyname': 'jenkins-build',
+        'image_name': 'centos-6.5-20140117.0.x86_64.qcow2',
+        'size': 'c3.mxlarge',
+        'labels': ['amd64', 'x86_64', 'centos', 'centos6', 'centos6.5'],
+        'provider': 'openstack'
+    },
+    'rhel6': {
+        'script': dedent("""#!/bin/bash
+        curl -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=2&labels=rhel6.5+amd64+rhel6+rhel+rhel6-pbuild+rhel-pbuild+x86_64&nodename=rhel6__%s" | bash"""),
+        'keyname': 'jenkins-build',
+        'image_name': 'centos-6.5-20140117.0.x86_64.qcow2',
+        'size': 'c3.mxlarge',
+        'labels': ['amd64', 'x86_64', 'rhel6', 'rhel6.5'],
+        'provider': 'openstack'
+    },
+    'rhel7': {
+        'script': dedent("""#!/bin/bash
+        curl -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=2&labels=amd64+rhel7+amd64+x86_64&nodename=rhel7__%s" | bash"""),
+        'keyname': 'jenkins-build',
+        'image_name': 'CentOS-7.1-x86_64-GenericCloud-1503',
+        'size': 'c3.mxlarge',
+        'labels': ['amd64', 'x86_64', 'rhel7'],
+        'provider': 'openstack'
+    },
+    'centos7': {
+        'script': dedent("""#!/bin/bash
+        curl -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=2&labels=amd64+centos7+amd64+x86_64&nodename=centos7__%s" | bash"""),
+        'keyname': 'jenkins-build',
+        'image_name': 'CentOS-7.1-x86_64-GenericCloud-1503',
+        'size': 'm3.mxlarge',
+        'labels': ['amd64', 'x86_64', 'centos7'],
+        'provider': 'openstack'
+    },
+    '__force_dict__': True
+
+}
