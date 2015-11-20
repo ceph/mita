@@ -72,7 +72,7 @@
 
 - name: check if database for app needs populating
   # this should be configurable/optional in the playbook
-  command: psql -t chacra -c "SELECT COUNT(*) FROM projects;"
+  command: psql -t {{ app_name }} -c "SELECT COUNT(*) FROM nodes;"
   sudo_user: postgres
   sudo: yes
   register: database_is_populated
