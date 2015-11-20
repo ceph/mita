@@ -3,6 +3,7 @@ from prod_db import sqlalchemy
 from prod_jenkins import jenkins
 from prod_provider import provider
 from prod_nodes import nodes
+from mita.hooks import error
 
 # Server Specific Configurations
 server = {
@@ -17,6 +18,7 @@ app = {
     'static_root': '%(confdir)s/public',
     'template_path': '%(confdir)s/mita/templates',
     'debug': False,
+    'hooks': [error.CustomErrorHook()],
 }
 
 logging = {
