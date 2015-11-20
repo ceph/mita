@@ -37,7 +37,7 @@ def create_node(**kw):
     driver = get_driver()
     images = driver.list_images()
     sizes = driver.list_sizes()
-    available_sizes = [s for s in sizes if s.id == kw['size']]
+    available_sizes = [s for s in sizes if s.name == kw['size']]
     if available_sizes:
         size = available_sizes[0]
         image = [i for i in images if i.name == kw['image_name']][0]
