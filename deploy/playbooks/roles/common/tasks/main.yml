@@ -53,7 +53,7 @@
   template:
     src: prod_nodes.py.j2
     dest: "{{ app_home }}/src/{{ app_name }}/prod_nodes.py"
-  when: (jenkins_prado_token is defined) or
+  when: (jenkins_prado_token is defined and prado_token is defined) or
         (app_home_created is defined and app_home_created|changed)
 
 - name: install python requirements in virtualenv
