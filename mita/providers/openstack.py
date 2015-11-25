@@ -1,8 +1,12 @@
+import logging
 from libcloud.compute.types import Provider
 from libcloud.compute.providers import get_driver
 from pecan import conf
 
 import libcloud.security
+
+
+logger = logging.getLogger(__name__)
 
 # FIXME
 # At the time this example was written, https://nova-api.trystack.org:5443
@@ -33,9 +37,11 @@ def create_node(**kw):
     driver = get_driver()
     images = driver.list_images()
     sizes = driver.list_sizes()
-    size = [s for s in sizes if s.id == kw['size']][0]
-    image = [i for i in images if i.name == kw['image_name']][0]
-    driver.create_node(name=name, image=image, size=size, ex_userdata=kw['script'], ex_keyname=kw['keyname'])
+    available_sizes = [s for s in sizes if s.id == kw['size']]
+    if available_sizes:
+        size = available_sizes[0]
+        image = [i for i in images if i.name == kw['image_name']][0]
+        driver.create_node(name=name, image=image, size=size, ex_userdata=kw['script'], ex_keyname=kw['keyname'])
 
 
 def destroy_node(**kw):
