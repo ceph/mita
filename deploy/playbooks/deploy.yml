@@ -1,0 +1,17 @@
+---
+
+- hosts: all
+  user: admin
+  roles:
+    - common
+    - celery
+  vars:
+     app_name: "mita"
+     use_ssl: true
+     wsgi_file: wsgi.py
+     wsgi_callable: application
+     ansible_ssh_port: 2222
+     branch: "master"
+     development_server: false
+     jenkins_url: "https://jenkins.ceph.com"
+     prado_url: "http://prado.ceph.com"

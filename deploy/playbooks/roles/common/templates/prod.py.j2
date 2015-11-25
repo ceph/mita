@@ -1,0 +1,52 @@
+# {{ ansible_managed }}
+from prod_db import sqlalchemy
+from prod_jenkins import jenkins
+from prod_provider import provider
+from prod_nodes import nodes
+from mita.hooks import error
+
+# Server Specific Configurations
+server = {
+    'port': '8000',
+    'host': '0.0.0.0'
+}
+
+# Pecan Application Configurations
+app = {
+    'root': 'mita.controllers.root.RootController',
+    'modules': ['mita'],
+    'static_root': '%(confdir)s/public',
+    'template_path': '%(confdir)s/mita/templates',
+    'debug': False,
+    'hooks': [error.CustomErrorHook()],
+}
+
+logging = {
+    'root': {'level': 'INFO', 'handlers': ['console']},
+    'loggers': {
+        'mita': {'level': 'DEBUG', 'handlers': ['console']},
+        'pecan': {'level': 'DEBUG', 'handlers': ['console']},
+        'py.warnings': {'handlers': ['console']},
+        '__force_dict__': True
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'color'
+        }
+    },
+    'formatters': {
+        'simple': {
+            'format': ('%(asctime)s %(levelname)-5.5s [%(name)s]'
+                       '[%(threadName)s] %(message)s')
+        },
+        'color': {
+            '()': 'pecan.log.ColorFormatter',
+            'format': ('%(asctime)s [%(padded_color_levelname)s] [%(name)s]'
+                       '[%(threadName)s] %(message)s'),
+        '__force_dict__': True
+        }
+    }
+}
+

@@ -1,0 +1,6 @@
+
+jenkins = {
+    'url': '{{ jenkins_url }}',
+    'user': '{{ jenkins_user | default("ceph-jenkins") }}',
+    'token': '{{ jenkins_token | default("") }}',
+}
