@@ -63,7 +63,7 @@ def from_label(string):
         return None
 
     node_from_label = match_node_from_label(node_or_label)
-    configured_nodes = conf['nodes'].to_dict()
+    configured_nodes = get_nodes()
     # node_or_label can be a node as a key in the config, so try to get that
     # first, and use the match from labels as a fallback. Try first with no
     # sanitizing of the node name, and if that doesn't work, try by splitting
@@ -120,7 +120,23 @@ def from_offline_node(string):
         "{0} is offline"
     """
     node = string.split()[0]
-    configured_nodes = conf['nodes'].to_dict()
+    configured_nodes = get_nodes()
+    # node can be a node as a key in the config, so try to get that first. Try
+    # first with no sanitizing of the node name, and if that doesn't work, try
+    # by splitting on possible use of __IP'
+    match = get_key(configured_nodes, node)
+    if match is None:
+        node = node.split('__')[0]
+        match = node if node in configured_nodes else None
+    return match
+
+
+def from_offline_executor(node):
+    """
+    This helper does not process the string, but rather, tries to map an
+    already parsed node name into something that has been configured.
+    """
+    configured_nodes = get_nodes()
     # node can be a node as a key in the config, so try to get that first. Try
     # first with no sanitizing of the node name, and if that doesn't work, try
     # by splitting on possible use of __IP'
