@@ -42,6 +42,42 @@ def match_node_from_labels(labels, configured_nodes):
 
 
 @app.task
+def check_idling():
+    """
+    Idling machines that have been lazy for N (configurable) minutes (defaults
+    to 10) will get removed from Jenkins, the mita database, and the cloud
+    provider (instance will get terminated).
+
+    The API does not provide information about idle time for a slave, nor it
+    can tell when was the last time it built something so we are required to
+    check for the ``idle`` key and if ``True`` then record that the node is in
+    idle mode with a timestamp on the database **if the previous state was not idling**
+
+    Once the
+    """
+    jenkins_url = app.conf.jenkins['url']
+    jenkins_user = app.conf.jenkins['user']
+    jenkins_token = app.conf.jenkins['token']
+    conn = jenkins.Jenkins(jenkins_url, jenkins_user, jenkins_token)
+    ci_nodes = conn.get_nodes()
+
+    # determine which nodes are nodes we have added, so that they can be processed:
+    mita_nodes = [n for n in ci_nodes if len(n['name'].split('__')) > 1]
+
+    if mita_nodes:
+        logger.info('found Jenkins nodes added by this service: %s' % len(mita_nodes))
+        # check if they are idle, and if so, ping the mita API so that it can handle
+        # proper removal of the node if it needs to
+        for n in mita_nodes:
+            uuid = n['name'].split('__')[-1]
+            node_endpoint = get_mita_api('nodes', uuid, 'idle')
+            requests.post(node_endpoint)
+
+    else:
+        logger.info('no Jenkins nodes added by this service where found')
+
+
+@app.task
 def check_queue():
     """
     Specifically checks for the status of the Jenkins queue. The docs are
@@ -107,6 +143,20 @@ def check_queue():
                 logger.info('found stuck task with name: %s' % task['task']['name'])
                 logger.info('reason was: %s' % task['why'])
                 node_name = util.match_node(task['why'])
+                if not node_name:
+                    logger.warning('unable to match a suitable node')
+                    logger.warning('will infer from builtOn')
+                    job_name = task['task']['url'].split('job')[-1].split('/')[1]
+                    job_id = conn.get_job_info(job_name)['nextBuildNumber']-1
+                    logger.info('determined job name as: %s' % job_name)
+                    logger.info('will look for build info on: %s id: %s' % (job_name, job_id))
+                    build = conn.get_build_info(job_name, job_id)
+                    logger.info('found a build')
+                    node_name = util.from_offline_executor(build['builtOn'])
+                    if not node_name:
+                        logger.warning('completely unable to match a node to provide')
+                        logger.warning(str(build))
+                        continue
                 logger.info('inferred node as: %s' % str(node_name))
                 if node_name:
                     logger.info('matched a node name to config: %s' % node_name)
@@ -144,7 +194,7 @@ def check_queue():
         logger.warning('attempted to get queue info but got: %s' % result)
 
 
-def get_mita_api(endpoint=None):
+def get_mita_api(endpoint=None, *args):
     """
     Puts together the API url for mita, so that we can talk to it. Optionally, the endpoint
     argument allows to return the correct url for specific needs. For example, to create a node:
@@ -158,13 +208,23 @@ def get_mita_api(endpoint=None):
     endpoints = {
         'nodes': '%s/nodes/' % base,
     }
+    url = base
     if endpoint:
-        return endpoints[endpoint]
-    return base
+        url = endpoints[endpoint]
+
+    if args:
+        for part in args:
+            url = os.path.join(url, part)
+    return url
 
 
 app.conf.update(
     CELERYBEAT_SCHEDULE={
+        'check-idle-every-30-seconds': {
+            'task': 'async.check_idling',
+            # FIXME: no way we want this to be 10 seconds
+            'schedule': timedelta(seconds=10),
+        },
         'add-every-30-seconds': {
             'task': 'async.check_queue',
             # FIXME: no way we want this to be 10 seconds
