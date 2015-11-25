@@ -1,8 +1,10 @@
 from copy import deepcopy
+from datetime import datetime
 import logging
 import uuid
 
-from pecan import expose, abort, request
+import jenkins
+from pecan import expose, abort, request, conf
 from mita.models import Node
 from mita import providers
 from mita.util import NodeState
@@ -12,9 +14,46 @@ logger = logging.getLogger(__name__)
 
 class NodeController(object):
 
-    def __init__(self, node_name):
-        self.node_name = node_name
-        self.node = Node.query.filter_by(name=node_name).first()
+    def __init__(self, identifier):
+        self.identifier = identifier
+        self.node = Node.query.filter_by(identifier=identifier).first()
+
+    @expose(generic=True, template='json')
+    def index(self):
+        if not self.node:
+            abort(404)
+
+    @expose('json')
+    def idle(self):
+        """
+        perform a check on the status of the current node, verifying how long
+        it has been idle (if at all) marking the current timestamp since idle
+        and determine if the node needs to be terminated.
+        """
+        if not self.node:
+            abort(404)
+        provider_for_node = conf.nodes[self.node.name]['provider']
+        provider = providers.get(provider_for_node)
+        if request.method != 'POST':
+            abort(405)
+        now = datetime.utcnow()
+        if self.node.idle:
+            # it was idle before so check how many seconds since it was lazy
+            difference = now - self.node.created
+            if difference.seconds < 600:  # 10 minutes
+                # we need to terminate this couch potato
+                provider.destroy_node(name=self.node.cloud_name)
+                # FIXMEEEEEEEE
+                jenkins_url = conf.jenkins['url']
+                jenkins_user = conf.jenkins['user']
+                jenkins_token = conf.jenkins['token']
+                conn = jenkins.Jenkins(jenkins_url, jenkins_user, jenkins_token)
+                conn.delete_node(self.node.cloud_name)
+                # delete from our database
+                self.node.delete()
+
+        else:  # mark it as being idle
+            self.node.idle_since = now
 
     # FIXME: validation is needed here
     @expose('json')
@@ -74,22 +113,47 @@ class NodesController(object):
             size=size,
         ).all()
 
+        # slap the UUID into the new node details
+        _id = str(uuid.uuid4())
+        _json['name'] = "%s__%s" % (name, _id)
+        # try to slap it into the script, it is not OK if we are not allowed to, assume we should
+        try:
+            _json['script'] = script % _id
+        except TypeError:
+            logger.error('attempted to add a UUID to the script but failed')
+            logger.error(
+                'ensure that a formatting entry for %s["script"] exists, like: %%s' % name
+            )
+            return  # do not add anything if we haven't been able to format
+
+        logger.info('checking if an existing node matches the labels')
         matching_nodes = [n for n in existing_nodes if n.labels_match(labels)]
         if not matching_nodes:  # we don't have anything that matches this that has been ever created
-            logger.info('requested node does not exist, will create one')
-            # slap the UUID into the new node details
-            _id = str(uuid.uuid4())
-            logger.info('changing name: %s' % _json['name'])
-            _json['name'] = "%s__%s" % (name, _id)
-            logger.info('changed name into something else: %s' % _json['name'])
-            # try to slap it into the script, it is not OK if we are not allowed to, assume we should
-            try:
-                _json['script'] = script % _id
-            except TypeError:
-                logger.error('attempted to add a UUID to the script but failed')
-                logger.error('ensure that a formatting entry exists, like: %%s')
-                return  # do not add anything if we haven't been able to format
+            logger.info('no matching nodes were found, will create one')
             logger.warning('creating node with details: %s' % str(_json))
+            provider.create_node(**_json)
+            _json.pop('name')
+            Node(
+                name=request.json['name'],
+                identifier=_id,
+                **_json
+            )
+        else:
+            logger.info('found existing nodes that match labels')
+            now = datetime.utcnow()
+            # we have something that matches, go over all of them and check:
+            # if *all of them* are over 8 (by default) minutes since creation.
+            # that means that they are probably busy, so create a new one
+            for n in matching_nodes:
+                difference = now - n.created
+                if difference.seconds < 480:  # 8 minutes
+                    logger.info('a node was already created in the past 8 minutes')
+                    logger.info('will not create one')
+                    return
+                    # FIXME: need to check with cloud provider and see if this
+                    # node is running, otherwise it means this node is dead and
+                    # should be removed from the DB
+            logger.info('no nodes created recently, will create a new one')
             provider.create_node(**_json)
             _json.pop('name')
             Node(
