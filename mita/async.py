@@ -222,13 +222,11 @@ app.conf.update(
     CELERYBEAT_SCHEDULE={
         'check-idle-every-30-seconds': {
             'task': 'async.check_idling',
-            # FIXME: no way we want this to be 10 seconds
-            'schedule': timedelta(seconds=10),
+            'schedule': timedelta(seconds=30),
         },
         'add-every-30-seconds': {
             'task': 'async.check_queue',
-            # FIXME: no way we want this to be 10 seconds
-            'schedule': timedelta(seconds=10),
+            'schedule': timedelta(seconds=30),
         },
     },
     nodes=pecan.conf.nodes,
