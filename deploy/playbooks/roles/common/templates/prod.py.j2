@@ -1,9 +1,11 @@
 # {{ ansible_managed }}
+from pecan.hooks import TransactionHook
 from prod_db import sqlalchemy
 from prod_jenkins import jenkins
 from prod_provider import provider
 from prod_nodes import nodes
 from mita.hooks import error
+from mita import models
 
 # Server Specific Configurations
 server = {
@@ -18,7 +20,16 @@ app = {
     'static_root': '%(confdir)s/public',
     'template_path': '%(confdir)s/mita/templates',
     'debug': False,
-    'hooks': [error.CustomErrorHook()],
+    'hooks': [
+        TransactionHook(
+            models.start,
+            models.start_read_only,
+            models.commit,
+            models.rollback,
+            models.clear
+        ),
+        error.CustomErrorHook(),
+    ],
 }
 
 logging = {
