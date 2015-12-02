@@ -31,7 +31,7 @@ class NodeController(object):
         and determine if the node needs to be terminated.
         """
         if not self.node:
-            abort(404)
+            abort(404, 'could not find UUID: %s' % self.identifier)
         provider_for_node = conf.nodes[self.node.name]['provider']
         provider = providers.get(provider_for_node)
         if request.method != 'POST':
