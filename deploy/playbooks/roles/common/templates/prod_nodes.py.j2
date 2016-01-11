@@ -5,7 +5,7 @@ keyname = "jenkins-build"
 nodes = {
     'precise_small': {
         'script': dedent("""#!/bin/bash
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+precise+small+x86_64&nodename=precise__%s" | bash
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+precise+small+x86_64&nodename=precise_small__%s" | bash
         """),
         'keyname': keyname,
         'image_name': 'Ubuntu 12.04',
@@ -15,7 +15,7 @@ nodes = {
     },
     'precise_huge': {
         'script': dedent("""#!/bin/bash
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+precise+huge+x86_64&nodename=precise__%s" | bash
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+precise+huge+x86_64&nodename=precise_huge__%s" | bash
         """),
         'keyname': keyname,
         'image_name': 'Ubuntu 12.04',
@@ -25,7 +25,7 @@ nodes = {
     },
     'wheezy_small': {
         'script': dedent("""#!/bin/bash
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+wheezy+small+x86_64&nodename=wheezy__%s" | bash
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+wheezy+small+x86_64&nodename=wheezy_small__%s" | bash
         """),
         'keyname': keyname,
         'image_name': 'Debian 7',
@@ -35,7 +35,7 @@ nodes = {
     },
     'wheezy_huge': {
         'script': dedent("""#!/bin/bash
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+wheezy+huge+x86_64&nodename=wheezy__%s" | bash
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+wheezy+huge+x86_64&nodename=wheezy_huge__%s" | bash
         """),
         'keyname': keyname,
         'image_name': 'Debian 7',
@@ -45,7 +45,7 @@ nodes = {
     },
     'jessie_small': {
         'script': dedent("""#!/bin/bash
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+jessie+small+x86_64&nodename=jessie__%s" | bash
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+jessie+small+x86_64&nodename=jessie_small__%s" | bash
         """),
         'keyname': keyname,
         'image_name': 'Debian 8',
@@ -55,7 +55,7 @@ nodes = {
     },
     'jessie_huge': {
         'script': dedent("""#!/bin/bash
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+wheezy+huge+x86_64&nodename=jessie__%s" | bash
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+wheezy+huge+x86_64&nodename=jessie_huge__%s" | bash
         """),
         'keyname': keyname,
         'image_name': 'Debian 8',
@@ -65,7 +65,7 @@ nodes = {
     },
     'trusty_small': {
         'script': dedent("""#!/bin/bash
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+trusty+small+x86_64&nodename=trusty__%s" | bash
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+trusty+small+x86_64&nodename=trusty_small__%s" | bash
         """),
         'keyname': keyname,
         'image_name': 'Ubuntu 14.04',
@@ -75,7 +75,7 @@ nodes = {
     },
     'trusty_huge': {
         'script': dedent("""#!/bin/bash
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+trusty+huge+x86_64&nodename=trusty__%s" | bash
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+trusty+huge+x86_64&nodename=trusty_huge__%s" | bash
         """),
         'keyname': keyname,
         'image_name': 'Ubuntu 14.04',
@@ -85,7 +85,7 @@ nodes = {
     },
     'centos6_small': {
         'script': dedent("""#!/bin/bash
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=2&labels=amd64+centos6+x86_64+small&nodename=centos6__%s" | bash"""),
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=2&labels=amd64+centos6+x86_64+small&nodename=centos6_small__%s" | bash"""),
         'keyname': keyname,
         'image_name': 'Centos 6',
         'size': 'vps-ssd-1',
@@ -94,7 +94,7 @@ nodes = {
     },
     'centos6_huge': {
         'script': dedent("""#!/bin/bash
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=2&labels=amd64+centos6+x86_64+huge&nodename=centos6__%s" | bash"""),
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=2&labels=amd64+centos6+x86_64+huge&nodename=centos6_huge__%s" | bash"""),
         'keyname': keyname,
         'image_name': 'Centos 6',
         'size': 'eg-30',
@@ -103,7 +103,7 @@ nodes = {
     },
     'centos7_small': {
         'script': dedent("""#!/bin/bash
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=2&labels=amd64+centos7+small+x86_64&nodename=centos7__%s" | bash"""),
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=2&labels=amd64+centos7+small+x86_64&nodename=centos7_small__%s" | bash"""),
         'keyname': keyname,
         'image_name': 'Centos 7',
         'size': 'vps-ssd-1',
@@ -112,7 +112,7 @@ nodes = {
     },
     'centos7_huge': {
         'script': dedent("""#!/bin/bash
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=2&labels=amd64+centos7+huge+x86_64&nodename=centos7__%s" | bash"""),
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=2&labels=amd64+centos7+huge+x86_64&nodename=centos7_huge__%s" | bash"""),
         'keyname': keyname,
         'image_name': 'Centos 7',
         'size': 'eg-30',
