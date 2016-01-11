@@ -21,10 +21,24 @@ def node_state_map():
 NodeState = node_state_map()
 
 
-def get_key(_dict, key, fallback=None):
+def get_key(_dict, key, fallback=True):
+    """
+    This helper is always used to check for a name (key) in configured nodes
+    (_dict). The fallback should is a boolean that should be lenient and try to
+    see if there is anything that will match.
+
+    This may be because a name can be like `10.0.0.1__name__huge` but the
+    configuration only has something for `name`. In which case it should try to
+    match that key and return it.
+    """
+    if not key:
+        return None
     if key in _dict:
         return key
-    return fallback or None
+    if fallback:
+        for name in _dict.keys():
+            if name in key:
+                return name
 
 # TODO: all these need proper logging
 # Stuck Queue Processors
