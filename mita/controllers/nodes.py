@@ -38,9 +38,11 @@ class NodeController(object):
             abort(405)
         now = datetime.utcnow()
         if self.node.idle:
-            # it was idle before so check how many seconds since it was lazy
-            difference = now - self.node.created
-            if difference.seconds < 600:  # 10 minutes
+            # it was idle before so check how many seconds since it was lazy.
+            # `idle` is a property that will only be true-ish if idle_since has
+            # been set.
+            difference = now - self.node.idle_since
+            if difference.seconds > 600:  # 10 minutes
                 # we need to terminate this couch potato
                 provider.destroy_node(name=self.node.cloud_name)
                 # FIXMEEEEEEEE
