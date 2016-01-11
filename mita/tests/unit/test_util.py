@@ -89,6 +89,10 @@ class TestOfflineNode(object):
         msg = BecauseNodeIsOffline % 'centos6'
         assert util.from_offline_node(msg) == 'centos6'
 
+    def test_matches_a_fallback(self):
+        msg = BecauseNodeIsOffline % '10.0.0.0_centos6_huge'
+        assert util.from_offline_node(msg) == 'centos6'
+
 
 class TestFromOfflineNodeLabel(object):
 
