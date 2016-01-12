@@ -24,6 +24,16 @@ class NodeController(object):
             abort(404)
 
     @expose('json')
+    def active(self):
+        """
+        Mark the node as active by setting idle_since to None.
+        """
+        if not self.node:
+            abort(404, 'could not find UUID: %s' % self.identifier)
+        logger.info("Marking %s as active." % self.node.identifier)
+        self.node.idle_since = None
+
+    @expose('json')
     def idle(self):
         """
         perform a check on the status of the current node, verifying how long
@@ -44,6 +54,7 @@ class NodeController(object):
             difference = now - self.node.idle_since
             if difference.seconds > 600:  # 10 minutes
                 # we need to terminate this couch potato
+                logger.info("Destroying node: %s" % self.node.cloud_name)
                 provider.destroy_node(name=self.node.cloud_name)
                 # FIXMEEEEEEEE
                 jenkins_url = conf.jenkins['url']
