@@ -71,9 +71,9 @@ def check_idling():
         for n in mita_nodes:
             node_info = conn.get_node_info(n['name'])
             logger.info('node info for %s: %s' % (n['name'], node_info))
+            uuid = n['name'].split('__')[-1]
             if node_info.get('idle'):
                 logging.info("found an idle node: %s" % n['name'])
-                uuid = n['name'].split('__')[-1]
                 node_endpoint = get_mita_api('nodes', uuid, 'idle')
                 requests.post(node_endpoint)
             else:
