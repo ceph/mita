@@ -69,10 +69,17 @@ def check_idling():
         # check if they are idle, and if so, ping the mita API so that it can handle
         # proper removal of the node if it needs to
         for n in mita_nodes:
-            uuid = n['name'].split('__')[-1]
-            node_endpoint = get_mita_api('nodes', uuid, 'idle')
-            requests.post(node_endpoint)
-
+            node_info = conn.get_node_info(n['name'])
+            logger.info('node info for %s: %s' % (n['name'], node_info))
+            if node_info.get('idle'):
+                logging.info("found an idle node: %s" % n['name'])
+                uuid = n['name'].split('__')[-1]
+                node_endpoint = get_mita_api('nodes', uuid, 'idle')
+                requests.post(node_endpoint)
+            else:
+                logger.info('%s is not idle, reset node.idle_since' % n['name'])
+                node_endpoint = get_mita_api('nodes', uuid, 'active')
+                requests.post(node_endpoint)
     else:
         logger.info('no Jenkins nodes added by this service where found')
 
