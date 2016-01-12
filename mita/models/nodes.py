@@ -3,6 +3,7 @@ from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.orm.exc import DetachedInstanceError
 from mita.models import Base
+from mita.util import get_jenkins_name
 
 
 class Node(Base):
@@ -42,6 +43,12 @@ class Node(Base):
     @property
     def cloud_name(self):
         return u'%s__%s' % (self.name, self.identifier)
+
+    @property
+    def jenkins_name(self):
+        if not hasattr(self, "_jenkins_name"):
+            self._jenkins_name = get_jenkins_name(self.identifier)
+        return self._jenkins_name
 
     @property
     def idle(self):
