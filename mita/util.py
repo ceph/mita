@@ -1,3 +1,5 @@
+import jenkins
+
 from libcloud.compute import types
 from pecan import conf
 
@@ -198,3 +200,19 @@ def get_nodes():
         return conf['nodes'].to_dict()
     except AttributeError:
         return conf['nodes']
+
+
+def get_jenkins_name(uuid):
+    """
+    Given a node's identifier use the jenkins api to find a node name in jenkins
+    that includes that uuid and return it.
+    """
+    jenkins_url = conf.jenkins['url']
+    jenkins_user = conf.jenkins['user']
+    jenkins_token = conf.jenkins['token']
+    conn = jenkins.Jenkins(jenkins_url, jenkins_user, jenkins_token)
+    nodes = conn.get_nodes()
+    for node in nodes:
+        if uuid in node['name']:
+            return node['name']
+    return None
