@@ -1,0 +1,4 @@
+
+
+class CloudNodeNotFound(Exception):
+    pass
