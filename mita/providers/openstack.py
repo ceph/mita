@@ -1,10 +1,10 @@
 import logging
 from libcloud.compute.types import Provider
 from libcloud.compute.providers import get_driver
+import libcloud.security
 from pecan import conf
 
-import libcloud.security
-
+from mita.exceptions import CloudNodeNotFound
 
 logger = logging.getLogger(__name__)
 
@@ -54,5 +54,9 @@ def destroy_node(**kw):
     driver = get_driver()
     name = kw['name']
     nodes = driver.list_nodes()
-    node = [n for n in nodes if n.name == name][0]
-    driver.destroy_node(node)
+    for node in nodes:
+        if node.name == name:
+            driver.destroy_node(node)
+            return
+
+    raise CloudNodeNotFound
