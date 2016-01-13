@@ -67,8 +67,9 @@ class NodeController(object):
                 jenkins_user = conf.jenkins['user']
                 jenkins_token = conf.jenkins['token']
                 conn = jenkins.Jenkins(jenkins_url, jenkins_user, jenkins_token)
-                logger.info("Deleting node in jenkins: %s" % self.node.jenkins_name)
-                conn.delete_node(self.node.jenkins_name)
+                if conn.node_exists(self.node.jenkins_name):
+                    logger.info("Deleting node in jenkins: %s" % self.node.jenkins_name)
+                    conn.delete_node(self.node.jenkins_name)
                 # delete from our database
                 self.node.delete()
 
