@@ -8,6 +8,7 @@ from pecan import expose, abort, request, conf
 from mita.models import Node
 from mita import providers
 from mita.util import NodeState
+from mita.exceptions import CloudNodeNotFound
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +31,8 @@ class NodeController(object):
         """
         if not self.node:
             abort(404, 'could not find UUID: %s' % self.identifier)
+        if self.node.idle_since is None:
+            return
         logger.info("Marking %s as active." % self.node.identifier)
         self.node.idle_since = None
 
@@ -55,12 +58,16 @@ class NodeController(object):
             if difference.seconds > 600:  # 10 minutes
                 # we need to terminate this couch potato
                 logger.info("Destroying node: %s" % self.node.cloud_name)
-                provider.destroy_node(name=self.node.cloud_name)
+                try:
+                    provider.destroy_node(name=self.node.cloud_name)
+                except CloudNodeNotFound:
+                    logger.info("node does not exist in cloud provider")
                 # FIXMEEEEEEEE
                 jenkins_url = conf.jenkins['url']
                 jenkins_user = conf.jenkins['user']
                 jenkins_token = conf.jenkins['token']
                 conn = jenkins.Jenkins(jenkins_url, jenkins_user, jenkins_token)
+                # FIXME: We need to see if this jenkins_node exists first
                 conn.delete_node(self.node.cloud_name)
                 # delete from our database
                 self.node.delete()

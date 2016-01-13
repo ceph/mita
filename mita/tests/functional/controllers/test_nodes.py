@@ -77,4 +77,3 @@ class TestNodesController(object):
         session.app.post('/api/nodes/%s/active' % node.identifier)
         node = Node.get(1)
         assert node.idle_since is None
-
