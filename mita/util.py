@@ -1,9 +1,11 @@
 from xml.etree import ElementTree
 from libcloud.compute import types
 from pecan import conf
+import logging
 
 from mita.connections import jenkins_connection
 
+logger = logging.getLogger(__name__)
 
 def node_state_map():
     """
@@ -89,6 +91,17 @@ def from_label(string):
     if match is None:
         clean_node = node_or_label.split('__')[0]
         match = get_key(configured_nodes, clean_node)
+
+    # It is possible that we got a custom node name with no
+    # naming conventions that would allow mita to understand
+    # what it needs to be built, so go and get the labels of
+    # this custom node and see if we can match them
+    if match is None:
+        logger.warning('unable to match: %s', node_or_label)
+        logger.warning('will look at node labels and attempt a match')
+        # node_or_label will now probably be a node with a custom name
+        match = util.match_node_from_labels(node_or_label)
+
     return match
 
 
