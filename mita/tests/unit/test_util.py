@@ -158,3 +158,38 @@ class TestMatchNode(object):
     def test_multi_nodelabel_is_offline_no_match(self):
         result = util.match_node(BecauseNodeLabelIsOffline % 'fast&&debian&&amd64')
         assert result is None
+
+
+class TestGetNodeLabels(object):
+
+    def setup(self):
+        util.jenkins_connection = lambda: None
+
+    def test_get_no_node_labels(self):
+        result = util.get_node_labels('trusty', _xml_configuration='<slave></slave>')
+        assert result == []
+
+    def test_get_correct_node_labels(self):
+        xml_string = """<?xml version="1.0" encoding="UTF-8"?>
+<slave>
+  <name>centos7+158.69.77.220</name>
+  <description></description>
+  <remoteFS>/home/jenkins-build/build</remoteFS>
+  <numExecutors>1</numExecutors>
+  <mode>NORMAL</mode>
+  <retentionStrategy class="hudson.slaves.RetentionStrategy$Always"/>
+  <launcher class="hudson.plugins.sshslaves.SSHLauncher" plugin="ssh-slaves@1.10">
+    <host>158.69.77.220</host>
+    <port>22</port>
+    <credentialsId>39fa150b-b2a1-416e-b334-29a9a2c0b32d</credentialsId>
+    <maxNumRetries>0</maxNumRetries>
+    <retryWaitTime>0</retryWaitTime>
+  </launcher>
+  <label>amd64 centos7 x86_64 huge</label>
+  <nodeProperties/>
+  <userId>prado</userId>
+</slave>
+        """
+        result = util.get_node_labels('trusty', _xml_configuration=xml_string)
+        assert result == ['amd64', 'centos7', 'x86_64', 'huge']
+
