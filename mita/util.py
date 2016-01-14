@@ -100,7 +100,7 @@ def from_label(string):
         logger.warning('unable to match: %s', node_or_label)
         logger.warning('will look at node labels and attempt a match')
         # node_or_label will now probably be a node with a custom name
-        match = match_node_from_labels(node_or_label)
+        match = match_node_from_labels(get_node_labels(node_or_label))
 
     return match
 
