@@ -1,7 +1,8 @@
-import jenkins
-
+from xml.etree import ElementTree
 from libcloud.compute import types
 from pecan import conf
+
+from mita.connections import jenkins_connection
 
 
 def node_state_map():
@@ -207,12 +208,28 @@ def get_jenkins_name(uuid):
     Given a node's identifier use the jenkins api to find a node name in jenkins
     that includes that uuid and return it.
     """
-    jenkins_url = conf.jenkins['url']
-    jenkins_user = conf.jenkins['user']
-    jenkins_token = conf.jenkins['token']
-    conn = jenkins.Jenkins(jenkins_url, jenkins_user, jenkins_token)
+    conn = jenkins_connection()
     nodes = conn.get_nodes()
     for node in nodes:
         if uuid in node['name']:
             return node['name']
     return None
+
+
+def get_node_labels(node_name, _xml_configuration=None):
+    """
+    Useful when a custom node was added with a name that mita does not
+    understand due to odd/unsupported naming conventions. The Jenkins Python
+    module doesn't have a nice JSON representation from the Jenkins API
+    response to look at the labels, so this parses that output looking for the
+    right tag and extracting the labels from there.
+    """
+    conn = jenkins_connection()
+    xml_configuration = _xml_configuration or conn.get_node_config(node_name)
+    xml_object = ElementTree.fromstring(xml_configuration)
+    for node in xml_object:
+        if node.tag == 'label':
+            # node labels are in this tag, parse the text. The XML should look
+            # like:  <label>amd64 centos7 x86_64 huge</label>
+            return node.text.split()
+    return []
