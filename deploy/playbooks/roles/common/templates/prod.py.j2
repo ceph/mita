@@ -44,12 +44,13 @@ logging = {
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
-            'formatter': 'color'
+            'formatter': 'simple'
         }
     },
     'formatters': {
         'simple': {
-            'format': ('%(asctime)s %(levelname)-5.5s [%(name)s]'
+            'format': ('%(asctime)s [%(levelname)-8s] [%(name)s]'
+%-8s
                        '[%(threadName)s] %(message)s')
         },
         'color': {
