@@ -5,6 +5,8 @@ from pecan import conf
 import logging
 
 from mita.connections import jenkins_connection
+from mita import expressions
+
 
 logger = logging.getLogger(__name__)
 
@@ -126,7 +128,15 @@ def from_offline_node_label(string):
     label = string.split()[-1]
     matched_node = match_node_from_label(label)
     if matched_node is None:
-        matched_node = match_node_from_labels(label.split('&&'))
+        # this means we have a label expression and not just a plain, single
+        # label, so try to expand them and return the first one that is
+        # matched, since the expander will return a list of lists because more
+        # than one set of labels can be generated
+        expanded_labels = expressions.expand(label)
+        for l in expanded_labels:
+            matched_node = match_node_from_labels(l)
+            if matched_node:
+                return matched_node
     return matched_node
 
 
