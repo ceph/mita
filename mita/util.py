@@ -95,6 +95,14 @@ def from_label(string):
         clean_node = node_or_label.split('__')[0]
         match = get_key(configured_nodes, clean_node)
 
+    # maybe we have a label expression and not just a single label
+    if match is None:
+        expanded_labels = expressions.expand(node_or_label)
+        for l in expanded_labels:
+            matched_node = match_node_from_labels(l)
+            if matched_node:
+                return matched_node
+
     # It is possible that we got a custom node name with no
     # naming conventions that would allow mita to understand
     # what it needs to be built, so go and get the labels of
