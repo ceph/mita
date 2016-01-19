@@ -113,10 +113,11 @@ def from_offline_node_label(string):
     This is a bit difficult to process, with the configuration matrix labels
     can show as: `label&&otherlabel`, which requires parsing to understand that
     this is a possibility.
+
     The behavior then, is to assume that we will get a clean label (just the
-    label and nothing else) and failing to do that, we must split by `&&` and
-    verify that all the labels in the resulting split are contained in
-    a configured host.
+    label and nothing else) and failing to do that, we must parse and verify
+    that all the labels in the resulting split are contained in a configured
+    host.
 
     String to process::
 
