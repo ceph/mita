@@ -73,46 +73,37 @@ class NodeController(object):
         else:  # mark it as being idle
             self.node.idle_since = now
 
-    def delete_jenkins_node(self, node):
+    def delete_jenkins_node(self):
         conn = jenkins_connection()
         if conn.node_exists(self.node.jenkins_name):
             logger.info("Deleting node in jenkins: %s" % self.node.jenkins_name)
             conn.delete_node(self.node.jenkins_name)
         logger.info("Node does not exist in Jenkins, cannot delete")
 
-    def delete_provider_node(self, provider, node):
+    def delete_provider_node(self):
         # we need to terminate this couch potato
+        provider = providers.get(self.node.provider)
         logger.info("Destroying cloud node: %s" % self.node.cloud_name)
         try:
             provider.destroy_node(name=self.node.cloud_name)
         except CloudNodeNotFound:
             logger.info("Node does not exist in cloud provider, cannot delete")
+        except Exception:
+            logger.exception("encountered errors while trying to delete node from cloud provider")
 
     def delete_mita_node(self):
         self.node.delete()
 
-    # FIXME: validation is needed here
     @expose('json')
     def delete(self):
         if request.method != 'POST':
             abort(405)
         if not self.node:
             abort(404)
-        provider = providers.get(request.json['provider'])
-        try:
-            # destroy from the cloud provider
-            destroyed = provider.destroy_node(**request.json)
-            if not destroyed:
-                # FIXME: this needs to return a proper reponse, not just a 500
-                abort(500)
-            # delete from the database
-            self.node.delete()
-        # FIXME: catch the exception from libcloud here
-        except Exception:
-            # find a way to REALLY sound the alarm because
-            # if we can't delete it means that the user is going
-            # to pay for a resource it should no longer exist
-            abort(500)
+
+        self.delete_provider_node()
+        self.delete_jenkins_node()
+        self.delete_mita_node()
 
     @expose('json')
     def status(self, **kw):
