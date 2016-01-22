@@ -1,3 +1,4 @@
+import pytest
 from pecan import set_config
 from mita import util
 
@@ -13,26 +14,33 @@ BecauseNodeLabelIsOffline = u"There are no nodes with the label \u2018%s\u2019"
 class TestFromLabel(object):
 
     def setup(self):
-        set_config(
-            {'nodes': {'wheezy': {'labels': ['amd64']}}},
-            overwrite=True
-        )
+        self.default_conf = {
+            'nodes': {'wheezy': {'labels': ['amd64']}},
+            'jenkins': {
+                'url': 'http://jenkins.example.com',
+                'user': 'alfredo',
+                'token': 'secret'},
+        }
+        set_config(self.default_conf, overwrite=True)
 
     def test_string_is_garbage(self):
         assert util.from_label('') is None
 
     def test_string_is_wrong_does_not_match(self):
-        set_config({'nodes': {}}, overwrite=True)
+        self.default_conf['nodes'] = {}
+        set_config(self.default_conf, overwrite=True)
         assert util.from_label('this is not garbage') is None
 
     def test_string_is_right_but_does_not_match(self):
         msg = BecauseNodeIsBusy % 'wheezy'
-        set_config({'nodes': {}}, overwrite=True)
+        self.default_conf['nodes'] = {}
+        set_config(self.default_conf, overwrite=True)
         assert util.from_label(msg) is None
 
     def test_string_is_right_and_matches_node_from_name(self):
         msg = BecauseNodeIsBusy % 'wheezy'
-        set_config({'nodes': {'wheezy': {'labels': []}}})
+        self.default_conf['nodes']['wheezy']['labels'] = []
+        set_config(self.default_conf, overwrite=True)
         assert util.from_label(msg) == 'wheezy'
 
     def test_string_is_right_and_matches_node_from_label(self):
@@ -126,10 +134,14 @@ class TestFromOfflineNodeLabel(object):
 class TestMatchNode(object):
 
     def setup(self):
-        set_config(
-            {'nodes': {'wheezy': {'labels': ['amd64', 'debian']}}},
-            overwrite=True
-        )
+        self.default_conf = {
+            'nodes': {'wheezy': {'labels': ['amd64', 'debian']}},
+            'jenkins': {
+                'url': 'http://jenkins.example.com',
+                'user': 'alfredo',
+                'token': 'secret'},
+        }
+        set_config(self.default_conf, overwrite=True)
 
     def test_busy_node(self):
         result = util.match_node(BecauseNodeIsBusy % 'wheezy')
@@ -193,3 +205,29 @@ class TestGetNodeLabels(object):
         result = util.get_node_labels('trusty', _xml_configuration=xml_string)
         assert result == ['amd64', 'centos7', 'x86_64', 'huge']
 
+
+stuck_reasons = [
+    "Waiting for next available executor on 10.0.1.1",
+    "All nodes of label awesomest are busy",
+    "SuperNode is offline",
+    "There are no nodes like that"
+]
+
+
+garbage_reasons = [
+    "All is good",
+    "Not waiting for a node",
+    "Running test",
+    "Executing on some label"
+]
+
+
+class TestIsStuck(object):
+
+    @pytest.mark.parametrize('why', stuck_reasons)
+    def test_is_stuck(self, why):
+        assert util.is_stuck(why) is True
+
+    @pytest.mark.parametrize('why', garbage_reasons)
+    def test_is_not_stuck(self, why):
+        assert util.is_stuck(why) is False
