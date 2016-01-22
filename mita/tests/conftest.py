@@ -22,6 +22,25 @@ def config_file():
     return os.path.join(here, 'config.py')
 
 
+@pytest.fixture(autouse=True)
+def no_jenkins_requests(monkeypatch):
+    """
+    If you don't do anything to patch a jenkins connection if the code under
+    test uses it, then you are bound to this dictatorial patching, preventing
+    from making actual connections.
+    """
+    class fake_jenkins(object):
+        def get_node_config(self, *a):
+            return """<?xml version="1.0" encoding="UTF-8"?><slave></slave>"""
+
+        def __getattr__(self, *a):
+            return self
+
+        def __call__(self, *a, **kw):
+            return {}
+    monkeypatch.setattr("jenkins.Jenkins", lambda *a: fake_jenkins())
+
+
 @pytest.fixture(scope='session')
 def app(request):
     config = configuration.conf_from_file(config_file()).to_dict()
@@ -176,3 +195,31 @@ class TestApp(object):
         """
         return self._do_request(url, 'DELETE', **kwargs)
 
+
+# this console logging configuration is basically just to be able to see output
+# in tests, and this file gets executed by py.test when it runs, so we get that
+# for free.
+import logging
+# Console Logger
+sh = logging.StreamHandler()
+sh.setLevel(logging.WARNING)
+
+formatter = logging.Formatter(
+    fmt='%(asctime)s.%(msecs)03d %(process)d:%(levelname)s:%(name)s:%(message)s',
+    datefmt='%Y-%m-%dT%H:%M:%S',
+    )
+sh.setFormatter(formatter)
+
+
+# because we're in a module already, __name__ is not the ancestor of
+# the rest of the package; use the root as the logger for everyone
+root_logger = logging.getLogger()
+
+# allow all levels at root_logger, handlers control individual levels
+root_logger.setLevel(logging.DEBUG)
+root_logger.addHandler(sh)
+
+console_loglevel = logging.DEBUG  # start at DEBUG for now
+
+# Console Logger
+sh.setLevel(console_loglevel)
