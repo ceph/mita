@@ -235,6 +235,8 @@ def match_node_from_labels(labels, configured_nodes=None):
     Given a list of labels, map them to a configured node type so that it can
     be created. All the labels must exist in the configured node
     """
+    if not labels:
+        return
     configured_nodes = configured_nodes or get_nodes()
 
     def labels_exist(config):
