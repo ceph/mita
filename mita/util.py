@@ -52,6 +52,32 @@ def get_key(_dict, key, fallback=True):
 # Stuck Queue Processors
 
 
+def is_stuck(string):
+    """
+    The Jenkins API might not cooperate with proper information, when a job is
+    stuck it may be sending out messages as it was stuck, but the
+    status['stuck'] will be False. This helper will check for the strings that
+    mita supports for stuck jobs.
+    """
+    def busy_summary(string): return string.startswith('Waiting for')
+
+    def offline_label_summary(string): return string.startswith('All nodes of label')
+
+    def offline_node_summary(string): return string.endswith('is offline')
+
+    def offline_node_label_summary(string): return string.startswith('There are no nodes')
+
+    for summary in [
+        busy_summary,
+        offline_label_summary,
+        offline_node_summary,
+        offline_node_label_summary
+    ]:
+        if summary(string) is True:
+            return True
+    return False
+
+
 def match_node(string):
     """
     Determine what node, if any, is needed from a given state of a Jenkins
