@@ -6,6 +6,7 @@ import uuid
 import jenkins
 from pecan import expose, abort, request, conf
 from mita.models import Node
+from mita.connections import jenkins_connection
 from mita import providers
 from mita.util import NodeState
 from mita.exceptions import CloudNodeNotFound
@@ -62,11 +63,7 @@ class NodeController(object):
                     provider.destroy_node(name=self.node.cloud_name)
                 except CloudNodeNotFound:
                     logger.info("node does not exist in cloud provider")
-                # FIXMEEEEEEEE
-                jenkins_url = conf.jenkins['url']
-                jenkins_user = conf.jenkins['user']
-                jenkins_token = conf.jenkins['token']
-                conn = jenkins.Jenkins(jenkins_url, jenkins_user, jenkins_token)
+                conn = jenkins_connection()
                 if conn.node_exists(self.node.jenkins_name):
                     logger.info("Deleting node in jenkins: %s" % self.node.jenkins_name)
                     conn.delete_node(self.node.jenkins_name)
@@ -75,6 +72,24 @@ class NodeController(object):
 
         else:  # mark it as being idle
             self.node.idle_since = now
+
+    def delete_jenkins_node(self, node):
+        conn = jenkins_connection()
+        if conn.node_exists(self.node.jenkins_name):
+            logger.info("Deleting node in jenkins: %s" % self.node.jenkins_name)
+            conn.delete_node(self.node.jenkins_name)
+        logger.info("Node does not exist in Jenkins, cannot delete")
+
+    def delete_provider_node(self, provider, node):
+        # we need to terminate this couch potato
+        logger.info("Destroying cloud node: %s" % self.node.cloud_name)
+        try:
+            provider.destroy_node(name=self.node.cloud_name)
+        except CloudNodeNotFound:
+            logger.info("Node does not exist in cloud provider, cannot delete")
+
+    def delete_mita_node(self):
+        self.node.delete()
 
     # FIXME: validation is needed here
     @expose('json')
