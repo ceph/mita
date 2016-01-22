@@ -145,7 +145,7 @@ def check_queue():
 
     if result:
         for task in result:
-            if task['stuck']:
+            if util.is_stuck(task['why']):
                 logger.info('found stuck task with name: %s' % task['task']['name'])
                 logger.info('reason was: %s' % task['why'])
                 node_name = util.match_node(task['why'])
