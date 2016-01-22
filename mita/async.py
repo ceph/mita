@@ -156,7 +156,11 @@ def check_queue():
                     job_id = conn.get_job_info(job_name)['nextBuildNumber']-1
                     logger.info('determined job name as: %s' % job_name)
                     logger.info('will look for build info on: %s id: %s' % (job_name, job_id))
-                    build = conn.get_build_info(job_name, job_id)
+                    try:
+                        build = conn.get_build_info(job_name, job_id)
+                    except jenkins.NotFoundException:
+                        logger.warning('there are no builds available for job')
+                        continue
                     logger.info('found a build')
                     node_name = util.from_offline_executor(build['builtOn'])
                     if not node_name:
