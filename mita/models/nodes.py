@@ -17,8 +17,9 @@ class Node(Base):
     size = Column(String(128))
     identifier = Column(String(128), nullable=False, unique=True, index=True)
     idle_since = Column(DateTime)
+    provider = Column(String(128))
 
-    def __init__(self, name, keyname, image_name, size, identifier, labels=None, **kw):
+    def __init__(self, name, keyname, image_name, size, identifier, provider, labels=None, **kw):
         self.name = name
         self.keyname = keyname
         self.image_name = image_name
@@ -26,6 +27,7 @@ class Node(Base):
         self.identifier = identifier
         self.created = datetime.datetime.utcnow()
         self.idle_since = None
+        self.provider = provider
         if labels:
             for l in labels:
                 Label(self, l)
