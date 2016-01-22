@@ -1,3 +1,4 @@
+import pytest
 from pecan import set_config
 from mita import util
 
@@ -204,3 +205,29 @@ class TestGetNodeLabels(object):
         result = util.get_node_labels('trusty', _xml_configuration=xml_string)
         assert result == ['amd64', 'centos7', 'x86_64', 'huge']
 
+
+stuck_reasons = [
+    "Waiting for next available executor on 10.0.1.1",
+    "All nodes of label awesomest are busy",
+    "SuperNode is offline",
+    "There are no nodes like that"
+]
+
+
+garbage_reasons = [
+    "All is good",
+    "Not waiting for a node",
+    "Running test",
+    "Executing on some label"
+]
+
+
+class TestIsStuck(object):
+
+    @pytest.mark.parametrize('why', stuck_reasons)
+    def test_is_stuck(self, why):
+        assert util.is_stuck(why) is True
+
+    @pytest.mark.parametrize('why', garbage_reasons)
+    def test_is_not_stuck(self, why):
+        assert util.is_stuck(why) is False
