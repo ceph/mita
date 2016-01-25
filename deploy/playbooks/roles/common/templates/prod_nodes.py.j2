@@ -63,6 +63,16 @@ nodes = {
         'labels': ['amd64', 'x86_64', 'jessie', 'huge'],
         'provider': 'openstack'
     },
+    'trusty_small_unique': {
+        'script': dedent("""#!/bin/bash
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+trusty+small+x86_64+unique&nodename=trusty_small__%s" | bash
+        """),
+        'keyname': keyname,
+        'image_name': 'Ubuntu 14.04',
+        'size': 'vps-ssd-1',
+        'labels': ['amd64', 'x86_64', 'trusty', 'small', 'unique'],
+        'provider': 'openstack'
+    },
     'trusty_small': {
         'script': dedent("""#!/bin/bash
         curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+trusty+small+x86_64&nodename=trusty_small__%s" | bash
@@ -99,6 +109,15 @@ nodes = {
         'image_name': 'Centos 6',
         'size': 'eg-30',
         'labels': ['amd64', 'x86_64', 'centos6', 'huge'],
+        'provider': 'openstack'
+    },
+    'centos7_small_unique': {
+        'script': dedent("""#!/bin/bash
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+centos7+small+x86_64+unique&nodename=centos7_small__%s" | bash"""),
+        'keyname': keyname,
+        'image_name': 'Centos 7',
+        'size': 'vps-ssd-1',
+        'labels': ['amd64', 'x86_64', 'centos7', 'small', 'unique'],
         'provider': 'openstack'
     },
     'centos7_small': {
