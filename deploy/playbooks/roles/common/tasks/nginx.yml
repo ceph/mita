@@ -47,7 +47,7 @@
   register: ssl_cert
 
 - name: create self-signed SSL cert
-  command: openssl req -new -nodes -x509 -subj "/C=US/ST=Oregon/L=Portland/O=IT/CN=${app_name}" -days 3650 -keyout /etc/ssl/private/{{ ansible_fqdn }}.key -out /etc/ssl/certs/{{ ansible_fqdn }}-bundled.crt -extensions v3_ca creates=/etc/nginx/ssl/{{ ansible_fqdn }}-bundled.crt
+  command: openssl req -new -nodes -x509 -subj "/C=US/ST=Oregon/L=Portland/O=IT/CN=${app_name}" -days 3650 -keyout /etc/ssl/private/{{ prod_fqdn }}.key -out /etc/ssl/certs/{{ prod_fqdn }}-bundled.crt -extensions v3_ca creates=/etc/nginx/ssl/{{ prod_fqdn }}-bundled.crt
   when: self_signed_ssl and ssl_cert.stat.exists == false
   sudo: true
   notify: restart nginx
