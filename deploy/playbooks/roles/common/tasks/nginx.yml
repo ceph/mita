@@ -56,7 +56,6 @@
   file:
     path: /etc/ssl/certs/{{ prod_fqdn }}-bundled.crt
     mode: 0777
-  when: development_server
   sudo: true
 
 - name: ensure nginx is restarted
