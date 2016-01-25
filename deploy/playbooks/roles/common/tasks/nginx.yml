@@ -24,7 +24,7 @@
   action: service name=nginx enabled=true
 
 - name: create nginx site config
-  action: template src=../templates/nginx_site.conf dest=/etc/nginx/sites-available/{{ app_name }}.conf
+  action: template src=../templates/mita.conf dest=/etc/nginx/sites-available/{{ app_name }}.conf
   sudo: true
   notify:
     - restart nginx
@@ -42,7 +42,7 @@
   sudo: true
 
 - name: check for SSL cert
-  stat: path=/etc/ssl/certs/{{ ansible_fqdn }}-bundled.crt
+  stat: path=/etc/ssl/certs/{{ prod_fqdn }}-bundled.crt
   ignore_errors: true
   register: ssl_cert
 
@@ -54,9 +54,8 @@
 
 - name: make sure permissions are correct for crt
   file:
-    path: /etc/ssl/certs/{{ ansible_fqdn }}-bundled.crt
+    path: /etc/ssl/certs/{{ prod_fqdn }}-bundled.crt
     mode: 0777
-  when: development_server
   sudo: true
 
 - name: ensure nginx is restarted

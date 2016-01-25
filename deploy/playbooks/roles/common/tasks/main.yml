@@ -70,3 +70,7 @@
 - include: circus.yml
   tags:
     - circus
+
+- include: nginx.yml
+  tags:
+    - nginx
