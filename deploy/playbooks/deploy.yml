@@ -13,5 +13,6 @@
      ansible_ssh_port: 2222
      branch: "master"
      development_server: false
+     self_signed_ssl: true
      jenkins_url: "https://jenkins.ceph.com"
      prado_url: "http://prado.ceph.com"
