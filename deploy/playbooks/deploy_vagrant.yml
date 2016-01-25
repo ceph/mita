@@ -14,5 +14,6 @@
      restart_app: true
      branch: "master"
      development_server: true
+     self_signed_ssl: true
      jenkins_url: "https://jenkins.ceph.com"
      prado_url: "http://prado.ceph.com"
