@@ -54,7 +54,8 @@ def create_node(**kw):
         # wait for the new node to become available
         logger.info("Waiting for node %s to become available" % name)
         driver.wait_until_running([new_node])
-        if driver.attach_volume(new_node, new_volume, 'dev/vdb') is not True:
+        logger.info(" ... available")
+        if driver.attach_volume(new_node, new_volume, '/dev/vdb') is not True:
             raise RuntimeError("Could not attached volume %s" % name)
         logger.info("Successfully attached volume %s" % name)
 
