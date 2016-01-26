@@ -104,6 +104,16 @@ def destroy_node(**kw):
     for node in nodes:
         if node.name == name:
             driver.destroy_node(node)
+            # also destroy any associated volumes
+            destroy_volume(name)
             return
 
     raise CloudNodeNotFound
+
+
+def destroy_volume(name):
+    driver = get_driver()
+    volume = get_volume(name)
+    if volume:
+        logger.info("Destroying volume %s" % name)
+        driver.destroy_volume(volume)
