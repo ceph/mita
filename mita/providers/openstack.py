@@ -70,12 +70,17 @@ def _wait_until_volume_available(volume, maybe_in_use=False):
     destroyed.
     """
     ok_states = ['creating']  # it's ok to wait if the volume is in this
+    tries = 0
     if maybe_in_use:
         ok_states.append('in_use')
     while volume.state in ok_states:
         sleep(3)
         volume = get_volume(volume.name)
         logger.info(' ... %s' % volume.state)
+        tries = tries + 1
+        if tries > 10:
+            logger.info("Maximum amount of tries reached..")
+            break
     if volume.state != 'available':
         raise RuntimeError('Volume %s is %s (not available)' % (volume.name, volume.state))
     return True
