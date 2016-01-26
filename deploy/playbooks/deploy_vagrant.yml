@@ -7,6 +7,7 @@
     - celery
   vars:
      app_name: "mita"
+     prod_fqdn: "local.mita.ceph.com"
      use_ssl: true
      wsgi_file: wsgi.py
      wsgi_callable: application
