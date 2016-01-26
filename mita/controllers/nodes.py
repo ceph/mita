@@ -156,7 +156,7 @@ class NodesController(object):
             )
             return  # do not add anything if we haven't been able to format
 
-        logger.info('checking if an existing node matches the labels')
+        logger.info('checking if an existing node matches required labels: %s', str(labels))
         matching_nodes = [n for n in existing_nodes if n.labels_match(labels)]
         if not matching_nodes:  # we don't have anything that matches this that has been ever created
             logger.info('no matching nodes were found, will create one')
@@ -169,7 +169,7 @@ class NodesController(object):
                 **_json
             )
         else:
-            logger.info('found existing nodes that match labels')
+            logger.info('found existing nodes that match labels: %s', len(matching_nodes))
             now = datetime.utcnow()
             # we have something that matches, go over all of them and check:
             # if *all of them* are over 8 (by default) minutes since creation.
@@ -177,7 +177,9 @@ class NodesController(object):
             for n in matching_nodes:
                 difference = now - n.created
                 if difference.seconds < 480:  # 8 minutes
-                    logger.info('a node was already created in the past 8 minutes')
+                    logger.info(
+                        'a matching node was already created in the past 8 minutes: %s', n.name
+                    )
                     logger.info('will not create one')
                     return
                     # FIXME: need to check with cloud provider and see if this
