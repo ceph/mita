@@ -1,6 +1,7 @@
 import logging
 from libcloud.compute.types import Provider
 from libcloud.compute.providers import get_driver
+from time import sleep
 import libcloud.security
 from pecan import conf
 
@@ -38,10 +39,45 @@ def create_node(**kw):
     images = driver.list_images()
     sizes = driver.list_sizes()
     available_sizes = [s for s in sizes if s.name == kw['size']]
+    storage = kw.get("storage")
     if available_sizes:
         size = available_sizes[0]
         image = [i for i in images if i.name == kw['image_name']][0]
-        driver.create_node(name=name, image=image, size=size, ex_userdata=kw['script'], ex_keyname=kw['keyname'])
+        new_node = driver.create_node(name=name, image=image, size=size, ex_userdata=kw['script'], ex_keyname=kw['keyname'])
+
+    if storage:
+        logger.info("Creating %sgb of storage for: %s" % (storage, name))
+        new_volume = driver.create_volume(storage, name)
+        # wait for the new volume to become available
+        logger.info("Waiting for volume %s to become available" % name)
+        _wait_until_volume_available(new_volume, maybe_in_use=True)
+        # wait for the new node to become available
+        logger.info("Waiting for node %s to become available" % name)
+        driver.wait_until_running([new_node])
+        if driver.attach_volume(new_node, new_volume, 'dev/vdb') is not True:
+            raise RuntimeError("Could not attached volume %s" % name)
+        logger.info("Successfully attached volume %s" % name)
+
+
+def _wait_until_volume_available(volume, maybe_in_use=False):
+    """
+    Wait until a StorageVolume's state is "available".
+    Set "maybe_in_use" to True in order to wait even when the volume is
+    currently in_use. For example, set this option if you're recycling
+    this volume from an old node that you've very recently
+    destroyed.
+    """
+    driver = get_driver()
+    ok_states = ['creating']  # it's ok to wait if the volume is in this
+    if maybe_in_use:
+        ok_states.append('in_use')
+    while volume.state in ok_states:
+        sleep(3)
+        volume = driver.get_volume(volume.name)
+        logger.info(' ... %s' % volume.state)
+    if volume.state != 'available':
+        raise RuntimeError('Volume %s is %s (not available)' % (volume.name, volume.state))
+    return True
 
 
 def destroy_node(**kw):
