@@ -41,6 +41,26 @@ def no_jenkins_requests(monkeypatch):
     monkeypatch.setattr("jenkins.Jenkins", lambda *a: fake_jenkins())
 
 
+@pytest.fixture(autouse=True)
+def no_openstack_create_node_requests(monkeypatch):
+    """
+    If you don't do anything to patch a openstack connection if the code under
+    test uses it, then you are bound to this dictatorial patching, preventing
+    from making actual connections.
+    """
+    monkeypatch.setattr("mita.providers.openstack.create_node", lambda **kw: True)
+
+@pytest.fixture(autouse=True)
+def no_openstack_destroy_node_requests(monkeypatch):
+    """
+    If you don't do anything to patch a openstack connection if the code under
+    test uses it, then you are bound to this dictatorial patching, preventing
+    from making actual connections.
+    """
+    monkeypatch.setattr("mita.providers.openstack.create_node", lambda **kw: True)
+
+
+
 @pytest.fixture(scope='session')
 def app(request):
     config = configuration.conf_from_file(config_file()).to_dict()
