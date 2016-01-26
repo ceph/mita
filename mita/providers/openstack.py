@@ -67,17 +67,26 @@ def _wait_until_volume_available(volume, maybe_in_use=False):
     this volume from an old node that you've very recently
     destroyed.
     """
-    driver = get_driver()
     ok_states = ['creating']  # it's ok to wait if the volume is in this
     if maybe_in_use:
         ok_states.append('in_use')
     while volume.state in ok_states:
         sleep(3)
-        volume = driver.get_volume(volume.name)
+        volume = get_volume(volume.name)
         logger.info(' ... %s' % volume.state)
     if volume.state != 'available':
         raise RuntimeError('Volume %s is %s (not available)' % (volume.name, volume.state))
     return True
+
+
+def get_volume(name):
+    """ Return libcloud.compute.base.StorageVolume """
+    driver = get_driver()
+    volumes = driver.list_volumes()
+    try:
+        return [v for v in volumes if v.name == name][0]
+    except IndexError:
+        return None
 
 
 def destroy_node(**kw):
