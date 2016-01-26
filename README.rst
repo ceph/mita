@@ -59,7 +59,8 @@ might look like::
             'image_name': 'Ubuntu Trusty (2014.04) cloudimg',
             'size': 'm3.xlarge',
             'labels': ['amd64', 'x86_64', 'precise', 'trusty', 'wheezy', 'jessie'],
-            'provider': 'openstack'
+            'provider': 'openstack',
+            'storage': 10
         }
     }
 
@@ -69,6 +70,9 @@ cloud provider (only important to be able to map it to a jenkins job need).
 
 The ``provider`` key allows the system to understand that this should map to
 a configured provider backend.
+
+The ``storage`` key is optional and when present will create and attach a volume
+to the node when creating it. The size of the volume is defined in gigabytes.
 
 Again, this configuration section relies on Apache `LibCloud`_ , please refer to the
 compute examples to see what other keys can be used here and common values.
