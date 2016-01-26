@@ -75,8 +75,11 @@ class NodeController(object):
 
     def delete_jenkins_node(self):
         conn = jenkins_connection()
+        logger.info("Deleting node in jenkins: %s" % self.node.jenkins_name)
+        if not self.node.jenkins_name:
+            logger.info('Node does not have a jenkins_name, will skip')
+            return
         if conn.node_exists(self.node.jenkins_name):
-            logger.info("Deleting node in jenkins: %s" % self.node.jenkins_name)
             conn.delete_node(self.node.jenkins_name)
         logger.info("Node does not exist in Jenkins, cannot delete")
 
