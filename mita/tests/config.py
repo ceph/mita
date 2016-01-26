@@ -1,4 +1,7 @@
+from pecan.hooks import TransactionHook
 from textwrap import dedent
+
+from mita import models
 
 # Server Specific Configurations
 server = {
@@ -11,6 +14,15 @@ app = {
     'root': 'mita.controllers.root.RootController',
     'modules': ['mita'],
     'debug': False,
+    'hooks': [
+        TransactionHook(
+            models.start,
+            models.start_read_only,
+            models.commit,
+            models.rollback,
+            models.clear
+        )
+    ],
 }
 
 logging = {
