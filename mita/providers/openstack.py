@@ -82,8 +82,8 @@ def _wait_until_volume_available(volume, maybe_in_use=False):
             logger.info("Maximum amount of tries reached..")
             break
         if volume.state == 'notfound':
-            logger.warning('no volume was found for: %s', volume.name)
-            continue
+            logger.error('no volume was found for: %s', volume.name)
+            break
         logger.info(' ... %s' % volume.state)
     if volume.state != 'available':
         # OVH uses a non-standard state of 3 to indicate an available volume
