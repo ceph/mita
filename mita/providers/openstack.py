@@ -81,7 +81,8 @@ def _wait_until_volume_available(volume, maybe_in_use=False):
         if tries > 10:
             logger.info("Maximum amount of tries reached..")
             break
-        if volume is None:
+        if volume.state == 'notfound':
+            logger.warning('no volume was found for: %s', volume.name)
             continue
         logger.info(' ... %s' % volume.state)
     if volume.state != 'available':
@@ -91,6 +92,21 @@ def _wait_until_volume_available(volume, maybe_in_use=False):
     return True
 
 
+class UnavailableVolume(object):
+    """
+    If a Volume is not found, this object will return to maintain compatibility
+    with actual (correct) StorageVolume objects from libcloud.
+
+    Note that the 'notfound' state does not comply directly with
+    `StorageVolumeState` but it is used internally to determine the inability
+    to find the correct volume.
+    """
+
+    def __init__(self, name, state='notfound'):
+        self.name = name
+        self.state = state
+
+
 def get_volume(name):
     """ Return libcloud.compute.base.StorageVolume """
     driver = get_driver()
@@ -98,7 +114,7 @@ def get_volume(name):
     try:
         return [v for v in volumes if v.name == name][0]
     except IndexError:
-        return None
+        return UnavailableVolume(name)
 
 
 def destroy_node(**kw):
