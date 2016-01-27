@@ -73,6 +73,7 @@ def _wait_until_volume_available(volume, maybe_in_use=False):
     tries = 0
     if maybe_in_use:
         ok_states.append('in_use')
+    logger.info('Volume %s is %s' % (volume.name, volume.state))
     while volume.state in ok_states:
         sleep(3)
         volume = get_volume(volume.name)
@@ -82,7 +83,9 @@ def _wait_until_volume_available(volume, maybe_in_use=False):
             logger.info("Maximum amount of tries reached..")
             break
     if volume.state != 'available':
-        raise RuntimeError('Volume %s is %s (not available)' % (volume.name, volume.state))
+        # OVH uses a non-standard state of 3 to indicate an available volume
+        logger.info('Volume %s is %s (not available)' % (volume.name, volume.state))
+        logger.info('The volume %s is not available, but will continue anyway...' % volume.name)
     return True
 
 
