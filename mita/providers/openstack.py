@@ -46,19 +46,19 @@ def create_node(**kw):
         new_node = driver.create_node(name=name, image=image, size=size, ex_userdata=kw['script'], ex_keyname=kw['keyname'])
 
     if storage:
-        logger.info("Creating %sgb of storage for: %s" % (storage, name))
+        logger.info("Creating %sgb of storage for: %s", storage, name)
         new_volume = driver.create_volume(storage, name)
         # wait for the new volume to become available
-        logger.info("Waiting for volume %s to become available" % name)
+        logger.info("Waiting for volume %s to become available", name)
         _wait_until_volume_available(new_volume, maybe_in_use=True)
         # wait for the new node to become available
-        logger.info("Waiting for node %s to become available" % name)
+        logger.info("Waiting for node %s to become available", name)
         driver.wait_until_running([new_node])
         logger.info(" ... available")
-        logger.info("Attaching volume %s..." % name)
+        logger.info("Attaching volume %s...", name)
         if driver.attach_volume(new_node, new_volume, '/dev/vdb') is not True:
             raise RuntimeError("Could not attached volume %s" % name)
-        logger.info("Successfully attached volume %s" % name)
+        logger.info("Successfully attached volume %s", name)
 
 
 def _wait_until_volume_available(volume, maybe_in_use=False):
@@ -73,7 +73,7 @@ def _wait_until_volume_available(volume, maybe_in_use=False):
     tries = 0
     if maybe_in_use:
         ok_states.append('in_use')
-    logger.info('Volume: %s is in state: %s' % (volume.name, volume.state))
+    logger.info('Volume: %s is in state: %s', volume.name, volume.state)
     while volume.state in ok_states:
         sleep(3)
         volume = get_volume(volume.name)
@@ -84,11 +84,11 @@ def _wait_until_volume_available(volume, maybe_in_use=False):
         if volume.state == 'notfound':
             logger.error('no volume was found for: %s', volume.name)
             break
-        logger.info(' ... %s' % volume.state)
+        logger.info(' ... %s', volume.state)
     if volume.state != 'available':
         # OVH uses a non-standard state of 3 to indicate an available volume
-        logger.info('Volume %s is %s (not available)' % (volume.name, volume.state))
-        logger.info('The volume %s is not available, but will continue anyway...' % volume.name)
+        logger.info('Volume %s is %s (not available)', volume.name, volume.state)
+        logger.info('The volume %s is not available, but will continue anyway...', volume.name)
     return True
 
 
@@ -141,5 +141,5 @@ def destroy_volume(name):
     driver = get_driver()
     volume = get_volume(name)
     if volume:
-        logger.info("Destroying volume %s" % name)
+        logger.info("Destroying volume %s", name)
         driver.destroy_volume(volume)
