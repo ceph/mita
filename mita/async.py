@@ -6,7 +6,7 @@ import jenkins
 import json
 import os
 import logging
-from mita import util
+from mita import util, models, providers
 logger = logging.getLogger(__name__)
 
 
@@ -202,6 +202,23 @@ def check_queue():
         logger.info('the Jenkins queue is empty, nothing to do')
     else:
         logger.warning('attempted to get queue info but got: %s' % result)
+
+
+@app.task
+def delete_node(node_id):
+    node = models.Node.get(node_id)
+    if not node:
+        logger.warning('async node deletion could not be completed')
+        logger.warning('%s node id no longer exists', node_id)
+        return
+
+    util.delete_provider_node(
+        providers.get(node.provider),
+        node.cloud_name
+    )
+    util.delete_jenkins_node(node.jenkins_name)
+    node.delete()
+    models.commit()
 
 
 def get_mita_api(endpoint=None, *args):
