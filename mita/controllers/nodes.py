@@ -1,6 +1,7 @@
 from copy import deepcopy
 from datetime import datetime
 import logging
+from time import sleep
 import uuid
 
 import jenkins
@@ -103,6 +104,10 @@ class NodeController(object):
             abort(405)
         if not self.node:
             abort(404)
+        # XXX we need validation here
+        delay = request.json.get('delay', 0)
+        if delay:
+            sleep(delay)
 
         self.delete_provider_node()
         self.delete_jenkins_node()
