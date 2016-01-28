@@ -5,7 +5,7 @@ import uuid
 
 from pecan import expose, abort, request, conf
 from mita.models import Node
-from mita.async import delete_node
+from mita.tasks import delete_node
 from mita.connections import jenkins_connection
 from mita import providers
 from mita.util import NodeState, delete_jenkins_node, delete_provider_node
