@@ -1,15 +1,14 @@
 from copy import deepcopy
 from datetime import datetime
 import logging
-from time import sleep
 import uuid
 
-import jenkins
 from pecan import expose, abort, request, conf
 from mita.models import Node
+from mita.async import delete_node
 from mita.connections import jenkins_connection
 from mita import providers
-from mita.util import NodeState
+from mita.util import NodeState, delete_jenkins_node, delete_provider_node
 from mita.exceptions import CloudNodeNotFound
 
 logger = logging.getLogger(__name__)
@@ -74,30 +73,6 @@ class NodeController(object):
         else:  # mark it as being idle
             self.node.idle_since = now
 
-    def delete_jenkins_node(self):
-        conn = jenkins_connection()
-        logger.info("Deleting node in jenkins: %s" % self.node.jenkins_name)
-        if not self.node.jenkins_name:
-            logger.info('Node does not have a jenkins_name, will skip')
-            return
-        if conn.node_exists(self.node.jenkins_name):
-            conn.delete_node(self.node.jenkins_name)
-        logger.info("Node does not exist in Jenkins, cannot delete")
-
-    def delete_provider_node(self):
-        # we need to terminate this couch potato
-        provider = providers.get(self.node.provider)
-        logger.info("Destroying cloud node: %s" % self.node.cloud_name)
-        try:
-            provider.destroy_node(name=self.node.cloud_name)
-        except CloudNodeNotFound:
-            logger.info("Node does not exist in cloud provider, cannot delete")
-        except Exception:
-            logger.exception("encountered errors while trying to delete node from cloud provider")
-
-    def delete_mita_node(self):
-        self.node.delete()
-
     @expose('json')
     def delete(self):
         if request.method != 'POST':
@@ -107,11 +82,16 @@ class NodeController(object):
         # XXX we need validation here
         delay = request.json.get('delay', 0)
         if delay:
-            sleep(delay)
-
-        self.delete_provider_node()
-        self.delete_jenkins_node()
-        self.delete_mita_node()
+            delete_node.apply_async(
+                self.node.id,
+                countdown=delay)
+        else:
+            delete_provider_node(
+                providers.get(self.node.provider),
+                self.node.cloud_name
+            )
+            delete_jenkins_node(self.node.jenkins_name)
+            self.node.delete()
 
     @expose('json')
     def status(self, **kw):
