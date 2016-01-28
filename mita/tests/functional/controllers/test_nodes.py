@@ -94,5 +94,5 @@ class TestNodeDeletion(object):
         node = Node.get(1)
         uuid = node.identifier
         # delete it
-        session.app.post('/api/nodes/%s/delete/' % uuid)
+        session.app.post_json('/api/nodes/%s/delete/' % uuid, params={})
         assert Node.get(1) is None
