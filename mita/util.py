@@ -5,10 +5,12 @@ from pecan import conf
 import logging
 
 from mita.connections import jenkins_connection
-from mita import expressions
+from mita.exceptions import CloudNodeNotFound
+from mita import expressions, providers
 
 
 logger = logging.getLogger(__name__)
+
 
 def node_state_map():
     """
@@ -314,10 +316,9 @@ def delete_jenkins_node(name):
 
 def delete_provider_node(provider, name):
     # we need to terminate this couch potato
-    provider = providers.get(self.node.provider)
-    logger.info("Destroying cloud node: %s" % self.node.cloud_name)
+    logger.info("Destroying cloud node: %s" % name)
     try:
-        provider.destroy_node(name=self.node.cloud_name)
+        provider.destroy_node(name=name)
     except CloudNodeNotFound:
         logger.info("Node does not exist in cloud provider, cannot delete")
     except Exception:
