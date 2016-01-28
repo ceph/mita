@@ -298,3 +298,27 @@ def get_node_labels(node_name, _xml_configuration=None):
             # like:  <label>amd64 centos7 x86_64 huge</label>
             return node.text.split()
     return []
+
+
+def delete_jenkins_node(name):
+    conn = jenkins_connection()
+    logger.info("Deleting node in jenkins: %s" % name)
+    if not name:
+        logger.info('Node does not have a jenkins_name, will skip')
+        return
+    if conn.node_exists(name):
+        conn.delete_node(name)
+        return
+    logger.info("Node does not exist in Jenkins, cannot delete")
+
+
+def delete_provider_node(provider, name):
+    # we need to terminate this couch potato
+    provider = providers.get(self.node.provider)
+    logger.info("Destroying cloud node: %s" % self.node.cloud_name)
+    try:
+        provider.destroy_node(name=self.node.cloud_name)
+    except CloudNodeNotFound:
+        logger.info("Node does not exist in cloud provider, cannot delete")
+    except Exception:
+        logger.exception("encountered errors while trying to delete node from cloud provider")
