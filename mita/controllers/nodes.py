@@ -80,7 +80,14 @@ class NodeController(object):
         if not self.node:
             abort(404)
         # XXX we need validation here
-        delay = request.json.get('delay', 0)
+        # XXX WE REALLY NEED VALIDATION HERE
+        try:
+            delay = request.json.get('delay', 0)
+        # simplejson.decoder.JSONDecodeError inherits from ValueError which is
+        # the same that the builtin Python json handler will raise when no JSON
+        # is passed in.
+        except ValueError:
+            delay = 0
         if delay:
             delete_node.apply_async(
                 self.node.id,
