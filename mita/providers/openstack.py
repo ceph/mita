@@ -140,6 +140,7 @@ def destroy_node(**kw):
 def destroy_volume(name):
     driver = get_driver()
     volume = get_volume(name)
-    if volume:
+    # check to see if this is a valid volume
+    if volume.state != "notfound":
         logger.info("Destroying volume %s", name)
         driver.destroy_volume(volume)
