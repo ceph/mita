@@ -90,7 +90,7 @@ class NodeController(object):
             delay = 0
         if delay:
             delete_node.apply_async(
-                self.node.id,
+                (self.node.id,),
                 countdown=delay)
         else:
             delete_provider_node(
