@@ -17,8 +17,6 @@ server = {
 app = {
     'root': 'mita.controllers.root.RootController',
     'modules': ['mita'],
-    'static_root': '%(confdir)s/public',
-    'template_path': '%(confdir)s/mita/templates',
     'debug': False,
     'hooks': [
         TransactionHook(
