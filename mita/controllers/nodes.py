@@ -90,11 +90,11 @@ class NodeController(object):
             delay = 0
         if delay:
             delete_node.apply_async(
-                self.node.id,
+                (self.node.id,),
                 countdown=delay)
         else:
             delete_provider_node(
-                providers.get(self.node.provider),
+                (providers.get(self.node.provider),),
                 self.node.cloud_name
             )
             delete_jenkins_node(self.node.jenkins_name)
