@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 @worker_init.connect
 def bootstrap_pecan(signal, sender):
     try:
-        os.environ['PECAN_CONFIG']
+        config_path = os.environ['PECAN_CONFIG']
     except KeyError:
         here = os.path.abspath(os.path.dirname(__file__))
         config_path = os.path.abspath(os.path.join(here, '../config/config.py'))
