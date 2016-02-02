@@ -1,14 +1,10 @@
 import pecan
-from celery import Celery
+from celery import shared_task
 import logging
 from mita import util, models, providers
 logger = logging.getLogger(__name__)
 
-
-app = Celery('mita.async', broker='amqp://guest@localhost//')
-
-
-@app.task
+@shared_task
 def delete_node(node_id):
     node = models.Node.get(node_id)
     if not node:
@@ -23,10 +19,3 @@ def delete_node(node_id):
     util.delete_jenkins_node(node.jenkins_name)
     node.delete()
     models.commit()
-
-
-app.conf.update(
-    nodes=pecan.conf.nodes,
-    pecan_app=pecan.conf.server,
-    jenkins=pecan.conf.jenkins
-)
