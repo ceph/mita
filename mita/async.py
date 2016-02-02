@@ -7,19 +7,22 @@ import json
 import os
 import logging
 from mita import util
+from celery.signals import worker_init
+
 logger = logging.getLogger(__name__)
 
 
-def get_pecan_config():
+@worker_init.connect
+def bootstrap_pecan(signal, sender):
     try:
-        os.environ['PECAN_CONFIG']
+        config_path = os.environ['PECAN_CONFIG']
     except KeyError:
         here = os.path.abspath(os.path.dirname(__file__))
         config_path = os.path.abspath(os.path.join(here, '../config/config.py'))
-        return config_path
+
+    pecan.configuration.set_config(config_path, overwrite=True)
 
 
-pecan.configuration.set_config(get_pecan_config(), overwrite=True)
 app = Celery('mita.async', broker='amqp://guest@localhost//', include=['mita.tasks'])
 
 
@@ -55,9 +58,9 @@ def check_idling():
 
     Once the
     """
-    jenkins_url = app.conf.jenkins['url']
-    jenkins_user = app.conf.jenkins['user']
-    jenkins_token = app.conf.jenkins['token']
+    jenkins_url = pecan.conf.jenkins['url']
+    jenkins_user = pecan.conf.jenkins['user']
+    jenkins_token = pecan.conf.jenkins['token']
     conn = jenkins.Jenkins(jenkins_url, jenkins_user, jenkins_token)
     ci_nodes = conn.get_nodes()
 
@@ -137,9 +140,9 @@ def check_queue():
     Since the key 'wheezy' matches the node required by the build system to
     continue it goes off to create it.
     """
-    jenkins_url = app.conf.jenkins['url']
-    jenkins_user = app.conf.jenkins['user']
-    jenkins_token = app.conf.jenkins['token']
+    jenkins_url = pecan.conf.jenkins['url']
+    jenkins_user = pecan.conf.jenkins['user']
+    jenkins_token = pecan.conf.jenkins['token']
     conn = jenkins.Jenkins(jenkins_url, jenkins_user, jenkins_token)
     result = conn.get_queue_info()
 
@@ -239,7 +242,4 @@ app.conf.update(
             'schedule': timedelta(seconds=30),
         },
     },
-    nodes=pecan.conf.nodes,
-    pecan_app=pecan.conf.server,
-    jenkins=pecan.conf.jenkins
 )
