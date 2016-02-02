@@ -7,19 +7,22 @@ import json
 import os
 import logging
 from mita import util
+from celery.signals import worker_init
+
 logger = logging.getLogger(__name__)
 
 
-def get_pecan_config():
+@worker_init.connect
+def bootstrap_pecan(signal, sender):
     try:
         os.environ['PECAN_CONFIG']
     except KeyError:
         here = os.path.abspath(os.path.dirname(__file__))
         config_path = os.path.abspath(os.path.join(here, '../config/config.py'))
-        return config_path
+
+    pecan.configuration.set_config(config_path, overwrite=True)
 
 
-pecan.configuration.set_config(get_pecan_config(), overwrite=True)
 app = Celery('mita.async', broker='amqp://guest@localhost//', include=['mita.tasks'])
 
 
