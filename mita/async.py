@@ -6,7 +6,7 @@ import jenkins
 import json
 import os
 import logging
-from mita import util, models, providers
+from mita import util
 logger = logging.getLogger(__name__)
 
 
@@ -20,7 +20,7 @@ def get_pecan_config():
 
 
 pecan.configuration.set_config(get_pecan_config(), overwrite=True)
-app = Celery('mita.async', broker='amqp://guest@localhost//')
+app = Celery('mita.async', broker='amqp://guest@localhost//', include=['mita.tasks'])
 
 
 def infer_labels(task_name):
