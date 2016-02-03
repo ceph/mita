@@ -6,7 +6,7 @@ import jenkins
 import json
 import os
 import logging
-from mita import util
+from mita import util, models
 from celery.signals import worker_init
 
 logger = logging.getLogger(__name__)
@@ -21,6 +21,9 @@ def bootstrap_pecan(signal, sender):
         config_path = os.path.abspath(os.path.join(here, '../config/config.py'))
 
     pecan.configuration.set_config(config_path, overwrite=True)
+    # Once configuration is set we need to initialize the models so that we can connect
+    # to the DB wth a configured mapper.
+    models.init_model()
 
 
 app = Celery('mita.async', broker='amqp://guest@localhost//', include=['mita.tasks'])
