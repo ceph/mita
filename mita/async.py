@@ -151,6 +151,11 @@ def check_queue():
 
     if result:
         for task in result:
+            if task['why'] is None:
+                # this may happen when multiple tasks are getting pilled up (for a PR for example) 
+                # and there is no 'why' yet. So the API has a `None` for it which would break logic
+                # to infer what is needed to get it unstuck
+                continue
             if util.is_stuck(task['why']):
                 logger.info('found stuck task with name: %s' % task['task']['name'])
                 logger.info('reason was: %s' % task['why'])
