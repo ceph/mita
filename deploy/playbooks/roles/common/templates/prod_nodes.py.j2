@@ -45,7 +45,8 @@ nodes = {
     },
     'jessie_small': {
         'script': dedent("""#!/bin/bash
-        wget -q -O - --auth-no-challenge --http-user={{ prado_user | default('admin') }} --http-password={{ prado_token }} "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+wheezy+small+x86_64&nodename=jessie_small__%s" | bash
+        apt-get update && apt-get install -y -q curl
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+jessie+small+x86_64&nodename=jessie_small__%s" | bash
         """),
         'keyname': keyname,
         'image_name': 'Debian 8',
@@ -55,7 +56,8 @@ nodes = {
     },
     'jessie_huge': {
         'script': dedent("""#!/bin/bash
-        wget -q -O - --auth-no-challenge --http-user={{ prado_user | default('admin') }} --http-password={{ prado_token }} "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+jessie+huge+x86_64&nodename=jessie_huge__%s" | bash
+        apt-get update && apt-get install -y -q curl
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+jessie+huge+x86_64&nodename=jessie_huge__%s" | bash
         """),
         'keyname': keyname,
         'image_name': 'Debian 8',
