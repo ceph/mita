@@ -266,8 +266,12 @@ def match_node_from_labels(labels, configured_nodes=None):
         return True
 
     for node, metadata in configured_nodes.items():
-        if labels_exist(metadata['labels']):
-            return node
+        if metadata.get('strict_labels'):
+            if set(labels) == set(metadata['labels']):
+                return node
+        else:
+            if labels_exist(metadata['labels']):
+                return node
 
 
 def get_nodes():
