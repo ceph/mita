@@ -235,7 +235,25 @@ def match_node_from_label(label, configured_nodes=None):
 def match_node_from_labels(labels, configured_nodes=None):
     """
     Given a list of labels, map them to a configured node type so that it can
-    be created. All the labels must exist in the configured node
+    be created. All the "asked for" labels must exist in the configured node,
+    which will cause any subset to be matched.
+
+    For example::
+
+        >>> match_node_from_labels(
+                ['python'], {'node1': {'labels': ['python', 'amd64']}}
+            )
+        >>> 'node1'
+
+    In strict mode the above would not return (An implicit `None`)::
+
+        >>> match_node_from_labels(
+                ['python', 'amd64'], {'node1': {
+                    'labels': ['python', 'amd64'],
+                    'strict_labels': True}}
+            )
+        >>> 'node1'
+
     """
     if not labels:
         return
