@@ -39,11 +39,24 @@ def create_node(**kw):
     images = driver.list_images()
     sizes = driver.list_sizes()
     available_sizes = [s for s in sizes if s.name == kw['size']]
+
+    if not available_sizes:
+        logger.error("provider does not have a matching 'size' for %s", kw['size'])
+        logger.error(
+            "no vm will be created. Ensure that '%s' is an available size and that it exists",
+            kw['size']
+        )
+        return
+
     storage = kw.get("storage")
-    if available_sizes:
-        size = available_sizes[0]
-        image = [i for i in images if i.name == kw['image_name']][0]
-        new_node = driver.create_node(name=name, image=image, size=size, ex_userdata=kw['script'], ex_keyname=kw['keyname'])
+
+    size = available_sizes[0]
+    image = [i for i in images if i.name == kw['image_name']][0]
+
+    new_node = driver.create_node(
+        name=name, image=image, size=size,
+        ex_userdata=kw['script'], ex_keyname=kw['keyname']
+    )
 
     if storage:
         logger.info("Creating %sgb of storage for: %s", storage, name)
