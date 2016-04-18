@@ -58,6 +58,11 @@ def create_node(**kw):
         ex_userdata=kw['script'], ex_keyname=kw['keyname']
     )
 
+    if not new_node:
+        logger.error("provider could not create node with details: %s", str(kw))
+
+    logger.info("created node: %s", new_node)
+
     if storage:
         logger.info("Creating %sgb of storage for: %s", storage, name)
         new_volume = driver.create_volume(storage, name)
