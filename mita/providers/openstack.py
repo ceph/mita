@@ -60,6 +60,7 @@ def create_node(**kw):
 
     if not new_node:
         logger.error("provider could not create node with details: %s", str(kw))
+        return
 
     logger.info("created node: %s", new_node)
 
