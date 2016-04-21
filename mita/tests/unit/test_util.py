@@ -231,3 +231,33 @@ class TestIsStuck(object):
     @pytest.mark.parametrize('why', garbage_reasons)
     def test_is_not_stuck(self, why):
         assert util.is_stuck(why) is False
+
+
+class TestMatchNodeFromLabels(object):
+
+    def test_subset_is_matched(self):
+        result = util.match_node_from_labels(
+            ['python'],
+            {'node1': {'labels': ['python', 'amd64']}}
+        )
+        assert result == 'node1'
+
+    def test_strict_labels_are_not_matched(self):
+        result = util.match_node_from_labels(
+            ['python'],
+            {'node1': {
+                    'labels': ['python', 'amd64'],
+                    'strict_labels': True}}
+            )
+
+        assert result is None
+
+    def test_strict_labels_are_matched(self):
+        result = util.match_node_from_labels(
+            ['python', 'amd64'],
+            {'node1': {
+                'labels': ['python', 'amd64'],
+                'strict_labels': True}}
+            )
+
+        assert result == 'node1'
