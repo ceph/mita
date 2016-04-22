@@ -231,8 +231,9 @@ def check_orphaned():
         # it is all good if this node exists in Jenkins. That is the whole
         # reason for its miserable existence, to work for Mr. Jenkins. Let it
         # be.
-        if conn.node_exists(node.jenkins_name):
-            continue
+        if node.jenkins_name:
+            if conn.node_exists(node.jenkins_name):
+                continue
         # So this node is not in Jenkins. If it is less than 15 minutes then
         # don't do anything because it might be just taking a while to join.
         # ALERT MR ROBINSON: 15 minutes is a magical number.
