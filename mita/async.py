@@ -1,12 +1,12 @@
 import pecan
 from celery import Celery
-from datetime import timedelta
+from datetime import timedelta, datetime
 import requests
 import jenkins
 import json
 import os
 import logging
-from mita import util, models
+from mita import util, models, connections, providers
 from celery.signals import worker_init
 
 logger = logging.getLogger(__name__)
@@ -152,7 +152,7 @@ def check_queue():
     if result:
         for task in result:
             if task['why'] is None:
-                # this may happen when multiple tasks are getting pilled up (for a PR for example) 
+                # this may happen when multiple tasks are getting pilled up (for a PR for example)
                 # and there is no 'why' yet. So the API has a `None` for it which would break logic
                 # to infer what is needed to get it unstuck
                 continue
@@ -215,6 +215,43 @@ def check_queue():
         logger.warning('attempted to get queue info but got: %s' % result)
 
 
+@app.task
+def check_orphaned():
+    """
+    Machines created in providers might be in an error state or some
+    configuration in between may have prevented them to join Jenkins (or
+    manually removed). This task will go through the nodes it knows about, make
+    sure they exist in the provider and if so, remove them from the mita
+    database and the provider.
+    """
+    conn = connections.jenkins_connection()
+    nodes = models.Node.query.all()
+
+    for node in nodes:
+        # it is all good if this node exists in Jenkins. That is the whole
+        # reason for its miserable existence, to work for Mr. Jenkins. Let it
+        # be.
+        if conn.node_exists(node.jenkins_name):
+            continue
+        # So this node is not in Jenkins. If it is less than 15 minutes then
+        # don't do anything because it might be just taking a while to join.
+        # ALERT MR ROBINSON: 15 minutes is a magical number.
+        now = datetime.utcnow()
+        difference = now - node.created
+        if difference.seconds > 900:  # magical number alert
+            logger.info("found created node that didn't join Jenkins: %s", node)
+            provider = providers.get(node.provider)
+            # "We often miss opportunity because it's dressed in overalls and
+            # looks like work". Node missed his opportunity here.
+            try:
+                provider.destroy_node(name=node.cloud_name)
+            except Exception:
+                logger.exception("unable to destroy node: %s", node.cloud_name)
+            logger.info("removed useless node from provider and database: %s", node)
+            node.delete()
+            models.commit()
+
+
 def get_mita_api(endpoint=None, *args):
     """
     Puts together the API url for mita, so that we can talk to it. Optionally, the endpoint
@@ -241,6 +278,10 @@ def get_mita_api(endpoint=None, *args):
 
 app.conf.update(
     CELERYBEAT_SCHEDULE={
+        'check-orphaned-every-120-seconds': {
+            'task': 'async.check_orphaned',
+            'schedule': timedelta(seconds=120),
+        },
         'check-idle-every-30-seconds': {
             'task': 'async.check_idling',
             'schedule': timedelta(seconds=30),
