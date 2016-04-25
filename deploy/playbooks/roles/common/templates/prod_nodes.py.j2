@@ -88,6 +88,16 @@ nodes = {
         'labels': ['amd64', 'x86_64', 'trusty', 'small', 'rebootable'],
         'provider': 'openstack'
     },
+    'trusty_pbuilder_huge': {
+        'script': dedent("""#!/bin/bash
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+trusty+huge+xenial+wheezy+precise+jessie+x86_64+rebootable+pbuilder-trusty&nodename=trusty_pbuilder_huge__%s" | bash
+        """),
+        'keyname': keyname,
+        'image_name': 'Ubuntu 14.04',
+        'size': 'hg-30',
+        'labels': ['trusty-pbuilder', 'amd64', 'x86_64', 'trusty', 'xenial', 'wheezy', 'precise', 'jessie', 'huge', 'rebootable'],
+        'provider': 'openstack'
+    },
     'trusty_huge': {
         'script': dedent("""#!/bin/bash
         curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+trusty+huge+x86_64+rebootable+rebootable&nodename=trusty_huge__%s" | bash
