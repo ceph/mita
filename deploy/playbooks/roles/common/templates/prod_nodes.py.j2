@@ -81,13 +81,9 @@ nodes = {
         'provider': 'openstack',
         'storage': 10
     },
-# XXX This mangling of Python is because Xenial does not come with /usr/bin/python and it comes with
-# Python 3 by default. Ansible doesn't work with Python 3 and this will never be able to get through
-# otherwise.
     'ceph_ansible_pr_xenial': {
         'script': dedent("""#!/bin/bash
-        apt-get install -y python2.7
-        ln -s /usr/bin/python2.7 /usr/bin/python
+        apt-get install -y python
         curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=ceph_ansible_pr_xenial&nodename=ceph_ansible_pr_xenial__%s" | bash
         """),
         'keyname': keyname,
