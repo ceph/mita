@@ -1,3 +1,7 @@
+'''
+A py.test plugin.  Loaded and run by py.test automatically.
+'''
+
 import os
 from pecan.testing import load_test_app
 
