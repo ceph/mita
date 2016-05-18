@@ -6,7 +6,8 @@ import logging
 
 from mita.connections import jenkins_connection
 from mita.exceptions import CloudNodeNotFound
-from mita import expressions, providers
+from mita import providers
+from mita.label_eval import matching_nodes
 
 
 logger = logging.getLogger(__name__)
@@ -125,11 +126,11 @@ def from_label(string):
 
     # maybe we have a label expression and not just a single label
     if match is None:
-        expanded_labels = expressions.expand(node_or_label)
-        for l in expanded_labels:
-            matched_node = match_node_from_labels(l)
-            if matched_node:
-                return matched_node
+        matched_node = match_node_from_label_expr(
+            node_or_label, configured_nodes
+        )
+        if matched_node:
+            return matched_node
 
     # It is possible that we got a custom node name with no
     # naming conventions that would allow mita to understand
@@ -165,15 +166,10 @@ def from_offline_node_label(string):
     label = string.split()[-1]
     matched_node = match_node_from_label(label)
     if matched_node is None:
-        # this means we have a label expression and not just a plain, single
-        # label, so try to expand them and return the first one that is
-        # matched, since the expander will return a list of lists because more
-        # than one set of labels can be generated
-        expanded_labels = expressions.expand(label)
-        for l in expanded_labels:
-            matched_node = match_node_from_labels(l)
-            if matched_node:
-                return matched_node
+        nodes = get_nodes()
+        matched_node = match_node_from_label_expr(label, nodes)
+        if matched_node:
+            return matched_node
     return matched_node
 
 
@@ -250,6 +246,24 @@ def match_node_from_labels(labels, configured_nodes=None):
     for node, metadata in configured_nodes.items():
         if labels_exist(metadata['labels']):
             return node
+
+
+def match_node_from_label_expr(expr, configured_nodes=None):
+    """
+    Given a label expression, find all matching configured node types
+    so that one can be created.
+    """
+    if not expr:
+        return
+    configured_nodes = configured_nodes or get_nodes()
+
+    matches = matching_nodes(expr, configured_nodes)
+    # XXX return first?  random?  try to figure out if
+    # one is already provisioning and return it?
+    if matches:
+        return matches[0]
+    else:
+        return None
 
 
 def get_nodes():

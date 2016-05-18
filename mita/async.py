@@ -29,24 +29,6 @@ def bootstrap_pecan(signal, sender):
 app = Celery('mita.async', broker='amqp://guest@localhost//', include=['mita.tasks'])
 
 
-def infer_labels(task_name):
-    values = task_name.split(',')
-    labels = [v.split('=')[-1] for v in values]
-    return labels
-
-
-def match_node_from_labels(labels, configured_nodes):
-    def labels_exist(config):
-        for l in labels:
-            if l not in config:
-                return False
-        return True
-
-    for node, metadata in configured_nodes.items():
-        if labels_exist(metadata['labels']):
-            return node
-
-
 @app.task
 def check_idling():
     """
