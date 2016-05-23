@@ -75,7 +75,7 @@ nodes = {
         curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=ceph_ansible_pr_trusty&nodename=ceph_ansible_pr_trusty__%s" | bash
         """),
         'keyname': keyname,
-        'image_name': 'Ubuntu 14.04',
+        'image_name': 'ceph-builders-U14.04-1.0.1',
         'size': 'vps-ssd-1',
         'labels': ['ceph_ansible_pr_trusty'],
         'provider': 'openstack',
@@ -87,7 +87,7 @@ nodes = {
         curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=ceph_ansible_pr_xenial&nodename=ceph_ansible_pr_xenial__%s" | bash
         """),
         'keyname': keyname,
-        'image_name': 'Ubuntu 16.04',
+        'image_name': 'ceph-builders-U16.04-1.0.1',
         'size': 'vps-ssd-1',
         'labels': ['ceph_ansible_pr_xenial'],
         'provider': 'openstack',
@@ -98,7 +98,7 @@ nodes = {
         curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+trusty+small+x86_64+rebootable&nodename=trusty_small__%s" | bash
         """),
         'keyname': keyname,
-        'image_name': 'Ubuntu 14.04',
+        'image_name': 'ceph-builders-U14.04-1.0.1',
         'size': 'vps-ssd-1',
         'labels': ['amd64', 'x86_64', 'trusty', 'small', 'rebootable'],
         'provider': 'openstack'
@@ -108,7 +108,7 @@ nodes = {
         curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+huge+jessie+x86_64+rebootable+trusty-pbuilder&nodename=jessie_trusty_pbuilder_huge__%s" | bash
         """),
         'keyname': keyname,
-        'image_name': 'Ubuntu 14.04',
+        'image_name': 'ceph-builders-U14.04-1.0.1',
         'size': 'hg-30',
         'labels': ['trusty-pbuilder', 'amd64', 'x86_64', 'jessie', 'huge', 'rebootable'],
         'provider': 'openstack'
@@ -118,7 +118,7 @@ nodes = {
         curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+huge+xenial+x86_64+rebootable+trusty-pbuilder&nodename=xenial_trusty_pbuilder_huge__%s" | bash
         """),
         'keyname': keyname,
-        'image_name': 'Ubuntu 14.04',
+        'image_name': 'ceph-builders-U14.04-1.0.1',
         'size': 'hg-30',
         'labels': ['trusty-pbuilder', 'amd64', 'x86_64', 'xenial', 'huge', 'rebootable'],
         'provider': 'openstack'
@@ -128,7 +128,7 @@ nodes = {
         curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+trusty+huge+x86_64+rebootable+rebootable&nodename=trusty_huge__%s" | bash
         """),
         'keyname': keyname,
-        'image_name': 'Ubuntu 14.04',
+        'image_name': 'ceph-builders-U14.04-1.0.1',
         'size': 'hg-30',
         'labels': ['amd64', 'x86_64', 'trusty', 'huge', 'rebootable'],
         'provider': 'openstack'
