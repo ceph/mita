@@ -155,7 +155,7 @@ nodes = {
         'script': dedent("""#!/bin/bash
         curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=ceph_ansible_pr_centos7&nodename=ceph_ansible_pr_centos7__%s" | bash"""),
         'keyname': keyname,
-        'image_name': 'Centos 7',
+        'image_name': 'ceph-builders-C7.2-1.0.1',
         'size': 'vps-ssd-1',
         'labels': ['ceph_ansible_pr_centos7'],
         'provider': 'openstack',
@@ -165,7 +165,7 @@ nodes = {
         'script': dedent("""#!/bin/bash
         curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=2&labels=amd64+centos7+small+x86_64+rebootable&nodename=centos7_small__%s" | bash"""),
         'keyname': keyname,
-        'image_name': 'Centos 7',
+        'image_name': 'ceph-builders-C7.2-1.0.1',
         'size': 'vps-ssd-1',
         'labels': ['amd64', 'x86_64', 'centos7', 'small', 'rebootable'],
         'provider': 'openstack'
@@ -174,7 +174,7 @@ nodes = {
         'script': dedent("""#!/bin/bash
         curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=2&labels=amd64+centos7+huge+x86_64+rebootable&nodename=centos7_huge__%s" | bash"""),
         'keyname': keyname,
-        'image_name': 'Centos 7',
+        'image_name': 'ceph-builders-C7.2-1.0.1',
         'size': 'hg-30',
         'labels': ['amd64', 'x86_64', 'centos7', 'huge', 'rebootable'],
         'provider': 'openstack'
