@@ -216,8 +216,9 @@ def from_offline_executor(node):
     # by splitting on possible use of __IP'
     match = get_key(configured_nodes, node)
     if match is None:
-        node = node.split('__')[0]
-        match = node if node in configured_nodes else None
+        if node is not None:
+            node = node.split('__')[0]
+            match = node if node in configured_nodes else None
     return match
 
 
