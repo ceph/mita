@@ -2,12 +2,22 @@ import logging
 from libcloud.compute.types import Provider
 from libcloud.compute.providers import get_driver
 from time import sleep
+import socket
+from ssl import SSLError
 import libcloud.security
 from pecan import conf
 
 from mita.exceptions import CloudNodeNotFound
 
 logger = logging.getLogger(__name__)
+
+# libcloud does not have a timeout enabled for Openstack calls to
+# ``create_node``, and it uses the default timeout value from socket which is
+# ``None`` (meaning: it will wait forever). This setting will set the default
+# to a magical number, which is 280 (4 minutes). This is 1 minute less than the
+# timeouts for production settings that should allow enough time to handle the
+# exception and return a response
+socket.setdefaulttimeout(280)
 
 # FIXME
 # At the time this example was written, https://nova-api.trystack.org:5443
@@ -53,10 +63,14 @@ def create_node(**kw):
     size = available_sizes[0]
     image = [i for i in images if i.name == kw['image_name']][0]
 
-    new_node = driver.create_node(
-        name=name, image=image, size=size,
-        ex_userdata=kw['script'], ex_keyname=kw['keyname']
-    )
+    try:
+        new_node = driver.create_node(
+            name=name, image=image, size=size,
+            ex_userdata=kw['script'], ex_keyname=kw['keyname']
+        )
+    except SSLError:
+        new_node = None
+        logger.error("failed to connect to provider, probably a timeout was reached")
 
     if not new_node:
         logger.error("provider could not create node with details: %s", str(kw))
