@@ -230,6 +230,8 @@ def check_orphaned():
                 provider.destroy_node(name=node.cloud_name)
             except Exception:
                 logger.exception("unable to destroy node: %s", node.cloud_name)
+                logger.error("will skip database removal")
+                return
             logger.info("removed useless node from provider and database: %s", node)
             node.delete()
             models.commit()
