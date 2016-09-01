@@ -210,6 +210,8 @@ def from_offline_executor(node):
     This helper does not process the string, but rather, tries to map an
     already parsed node name into something that has been configured.
     """
+    if node is None:
+        return None
     configured_nodes = get_nodes()
     # node can be a node as a key in the config, so try to get that first. Try
     # first with no sanitizing of the node name, and if that doesn't work, try
