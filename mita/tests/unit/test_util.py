@@ -60,7 +60,7 @@ class TestOfflineLabel(object):
 
     def setup(self):
         set_config(
-            {'nodes': {'centos6': {'labels': ['x86_64']}}},
+            {'nodes': {'centos6': {'labels': ['x86_64', 'huge']}}},
             overwrite=True
         )
         self.msg = BecauseLabelIsOffline % 'amd64'
@@ -74,6 +74,10 @@ class TestOfflineLabel(object):
 
     def test_matches_a_label(self):
         msg = BecauseLabelIsOffline % 'x86_64'
+        assert util.from_offline_label(msg) == 'centos6'
+
+    def test_works_with_label_expression(self):
+        msg = BecauseLabelIsOffline % 'x86_64&&huge'
         assert util.from_offline_label(msg) == 'centos6'
 
 
