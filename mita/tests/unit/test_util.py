@@ -235,3 +235,14 @@ class TestIsStuck(object):
     @pytest.mark.parametrize('why', garbage_reasons)
     def test_is_not_stuck(self, why):
         assert util.is_stuck(why) is False
+
+
+class TestFromOfflineExecutor(object):
+    def setup(self):
+        set_config(
+            {'nodes': {'centos6': {'labels': ['x86_64']}}},
+            overwrite=True
+        )
+
+    def test_none_node_does_not_break(self):
+        assert util.from_offline_executor(None) is None
