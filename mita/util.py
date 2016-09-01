@@ -184,7 +184,11 @@ def from_offline_label(string):
     for i in to_remove:
         string = string.replace(i, '')
     label = string.split()[-3]
-    return match_node_from_label(label)
+    # first check if we get a match from a single label, e.g. 'amd64'
+    single_label_match = match_node_from_label(label)
+    # otherwise, fallback to multi-labels, like 'amd64&&trusty'
+    if not single_label_match:
+        return from_offline_node_label(label)
 
 
 def from_offline_node(string):
