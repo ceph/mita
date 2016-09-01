@@ -56,7 +56,7 @@ class NodeController(object):
             # `idle` is a property that will only be true-ish if idle_since has
             # been set.
             difference = now - self.node.idle_since
-            if difference.seconds > 600:  # 10 minutes
+            if difference.seconds > 1200:  # 20 minutes
                 # we need to terminate this couch potato
                 logger.info("Destroying node: %s" % self.node.cloud_name)
                 try:
