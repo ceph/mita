@@ -168,9 +168,11 @@ class NodesController(object):
             # that means that they are probably busy, so create a new one
             for n in matching_nodes:
                 difference = now - n.created
-                if difference.seconds < 480:  # 8 minutes
+                if difference.seconds < 360:  # 6 minutes
                     logger.info(
-                        'a matching node was already created in the past 8 minutes: %s', n.name
+                        'a matching node was already created %s seconds ago (less than 6 minutes): %s',
+                        difference.seconds,
+                        n.name
                     )
                     logger.info('will not create one')
                     return
