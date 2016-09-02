@@ -7,7 +7,7 @@ from pecan import expose, abort, request, conf
 from mita.models import Node
 from mita.tasks import delete_node
 from mita.connections import jenkins_connection
-from mita import providers
+from mita import providers, models
 from mita.util import NodeState, delete_jenkins_node, delete_provider_node
 from mita.exceptions import CloudNodeNotFound
 
@@ -128,6 +128,9 @@ class NodesController(object):
         size = _json['size']
         labels = _json['labels']
         script = _json['script']
+        count = _json.get('count', 1)
+        # a buffered count is half what is needed rounded up
+        buffered_count = int(round(count * 0.5))
         existing_nodes = Node.filter_by(
             name=name,
             keyname=keyname,
@@ -135,12 +138,10 @@ class NodesController(object):
             size=size,
         ).all()
 
-        # slap the UUID into the new node details
-        _id = str(uuid.uuid4())
-        _json['name'] = "%s__%s" % (name, _id)
         # try to slap it into the script, it is not OK if we are not allowed to, assume we should
+        # this is just a validation step, should be taken care of by proper schema validation.
         try:
-            _json['script'] = script % _id
+            script % '0000-aaaaa'
         except TypeError:
             logger.error('attempted to add a UUID to the script but failed')
             logger.error(
@@ -151,8 +152,12 @@ class NodesController(object):
         logger.info('checking if an existing node matches required labels: %s', str(labels))
         matching_nodes = [n for n in existing_nodes if n.labels_match(labels)]
         if not matching_nodes:  # we don't have anything that matches this that has been ever created
-            logger.info('no matching nodes were found, will create new ones. count: %s', _json.get('count', 1))
-            for i in range(_json.get('count', 1)):
+            logger.info('job needs %s nodes to get unstuck', count)
+            logger.info(
+                'no matching nodes were found, will create new ones. count: %s',
+                buffered_count
+            )
+            for i in range(buffered_count):
                 # slap the UUID into the new node details
                 node_kwargs = deepcopy(request.json)
                 _id = str(uuid.uuid4())
@@ -161,10 +166,11 @@ class NodesController(object):
                 provider.create_node(**node_kwargs)
                 node_kwargs.pop('name')
                 Node(
-                    name=request.json['name'],
+                    name=name,
                     identifier=_id,
                     **node_kwargs
                 )
+                models.commit()
         else:
             logger.info('found existing nodes that match labels: %s', len(matching_nodes))
             now = datetime.utcnow()
@@ -176,12 +182,20 @@ class NodesController(object):
                 difference = now - n.created
                 if difference.seconds < 360:  # 6 minutes
                     already_created_nodes += 1
-            if already_created_nodes > _json.get('count', 1):
-                logger.info('there are %s node(s) already created 6 minutes ago', already_created_nodes)
+            if already_created_nodes > count:
+                logger.info('job needs %s nodes to get unstuck', count)
+                logger.info(
+                    'but there are %s node(s) already created 6 minutes ago',
+                    already_created_nodes
+                )
                 logger.info('will not create one')
                 return
-            logger.info('no nodes created recently enough, will create new ones. count: %s', _json.get('count', 1))
-            for i in range(_json.get('count', 1)):
+            logger.info('job needs %s nodes to get unstuck', count)
+            logger.info(
+                'no nodes created recently enough, will create new ones. count: %s',
+                buffered_count
+            )
+            for i in range(buffered_count):
                 # slap the UUID into the new node details
                 node_kwargs = deepcopy(request.json)
                 _id = str(uuid.uuid4())
@@ -190,10 +204,11 @@ class NodesController(object):
                 provider.create_node(**node_kwargs)
                 node_kwargs.pop('name')
                 Node(
-                    name=request.json['name'],
+                    name=name,
                     identifier=_id,
                     **node_kwargs
                 )
+                models.commit()
 
     @expose('json')
     def _lookup(self, node_name, *remainder):
