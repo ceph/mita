@@ -171,20 +171,16 @@ class NodesController(object):
             # we have something that matches, go over all of them and check:
             # if *all of them* are over 6 (by default) minutes since creation.
             # that means that they are probably busy, so create a new one
+            already_created_nodes = 0
             for n in matching_nodes:
                 difference = now - n.created
                 if difference.seconds < 360:  # 6 minutes
-                    logger.info(
-                        'a matching node was already created %s seconds ago (less than 6 minutes): %s',
-                        difference.seconds,
-                        n.name
-                    )
-                    logger.info('will not create one')
-                    return
-                    # FIXME: need to check with cloud provider and see if this
-                    # node is running, otherwise it means this node is dead and
-                    # should be removed from the DB
-            logger.info('no nodes created recently, will create new ones. count: %s', _json.get('count', 1))
+                    already_created_nodes += 1
+            if already_created_nodes > _json.get('count', 1):
+                logger.info('there are %s node(s) already created 6 minutes ago', already_created_nodes)
+                logger.info('will not create one')
+                return
+            logger.info('no nodes created recently enough, will create new ones. count: %s', _json.get('count', 1))
             for i in range(_json.get('count', 1)):
                 # slap the UUID into the new node details
                 node_kwargs = deepcopy(request.json)
