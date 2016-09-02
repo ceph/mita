@@ -56,7 +56,7 @@ class NodeController(object):
             # `idle` is a property that will only be true-ish if idle_since has
             # been set.
             difference = now - self.node.idle_since
-            if difference.seconds > 600:  # 10 minutes
+            if difference.seconds > 1200:  # 20 minutes
                 # we need to terminate this couch potato
                 logger.info("Destroying node: %s" % self.node.cloud_name)
                 try:
@@ -168,9 +168,11 @@ class NodesController(object):
             # that means that they are probably busy, so create a new one
             for n in matching_nodes:
                 difference = now - n.created
-                if difference.seconds < 480:  # 8 minutes
+                if difference.seconds < 360:  # 6 minutes
                     logger.info(
-                        'a matching node was already created in the past 8 minutes: %s', n.name
+                        'a matching node was already created %s seconds ago (less than 6 minutes): %s',
+                        difference.seconds,
+                        n.name
                     )
                     logger.info('will not create one')
                     return
