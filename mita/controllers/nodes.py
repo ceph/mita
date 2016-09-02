@@ -151,20 +151,25 @@ class NodesController(object):
         logger.info('checking if an existing node matches required labels: %s', str(labels))
         matching_nodes = [n for n in existing_nodes if n.labels_match(labels)]
         if not matching_nodes:  # we don't have anything that matches this that has been ever created
-            logger.info('no matching nodes were found, will create one')
-            logger.warning('creating node with details: %s' % str(_json))
-            provider.create_node(**_json)
-            _json.pop('name')
-            Node(
-                name=request.json['name'],
-                identifier=_id,
-                **_json
-            )
+            logger.info('no matching nodes were found, will create new ones. count: %s', _json.get('count', 1))
+            for i in range(_json.get('count', 1)):
+                # slap the UUID into the new node details
+                node_kwargs = deepcopy(request.json)
+                _id = str(uuid.uuid4())
+                node_kwargs['name'] = "%s__%s" % (name, _id)
+
+                provider.create_node(**node_kwargs)
+                node_kwargs.pop('name')
+                Node(
+                    name=request.json['name'],
+                    identifier=_id,
+                    **node_kwargs
+                )
         else:
             logger.info('found existing nodes that match labels: %s', len(matching_nodes))
             now = datetime.utcnow()
             # we have something that matches, go over all of them and check:
-            # if *all of them* are over 8 (by default) minutes since creation.
+            # if *all of them* are over 6 (by default) minutes since creation.
             # that means that they are probably busy, so create a new one
             for n in matching_nodes:
                 difference = now - n.created
@@ -179,14 +184,20 @@ class NodesController(object):
                     # FIXME: need to check with cloud provider and see if this
                     # node is running, otherwise it means this node is dead and
                     # should be removed from the DB
-            logger.info('no nodes created recently, will create a new one')
-            provider.create_node(**_json)
-            _json.pop('name')
-            Node(
-                name=request.json['name'],
-                identifier=_id,
-                **_json
-            )
+            logger.info('no nodes created recently, will create new ones. count: %s', _json.get('count', 1))
+            for i in range(_json.get('count', 1)):
+                # slap the UUID into the new node details
+                node_kwargs = deepcopy(request.json)
+                _id = str(uuid.uuid4())
+                node_kwargs['name'] = "%s__%s" % (name, _id)
+
+                provider.create_node(**node_kwargs)
+                node_kwargs.pop('name')
+                Node(
+                    name=request.json['name'],
+                    identifier=_id,
+                    **node_kwargs
+                )
 
     @expose('json')
     def _lookup(self, node_name, *remainder):
