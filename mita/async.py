@@ -7,6 +7,7 @@ import json
 import os
 import logging
 from mita import util, models, connections, providers
+from mita.exceptions import CloudNodeNotFound
 from celery.signals import worker_init
 
 logger = logging.getLogger(__name__)
@@ -228,13 +229,16 @@ def check_orphaned():
             # looks like work". Node missed his opportunity here.
             try:
                 provider.destroy_node(name=node.cloud_name)
+            except CloudNodeNotFound:
+                logger.info("cloud was not found on provider: %s", node.cloud_name)
+                pass
             except Exception:
                 logger.exception("unable to destroy node: %s", node.cloud_name)
                 logger.error("will skip database removal")
-                return
-            logger.info("removed useless node from provider and database: %s", node)
+                continue
             node.delete()
             models.commit()
+            logger.info("removed useless node from provider and database: %s", node)
 
 
 def get_mita_api(endpoint=None, *args):
