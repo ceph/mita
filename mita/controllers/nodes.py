@@ -129,8 +129,8 @@ class NodesController(object):
         labels = _json['labels']
         script = _json['script']
         count = _json.get('count', 1)
-        # a buffered count is half what is needed rounded up
-        buffered_count = int(round(count * 0.5))
+        # a buffered count is 3/4 what is needed rounded up
+        buffered_count = int(round(count * 0.75))
         existing_nodes = Node.filter_by(
             name=name,
             keyname=keyname,
@@ -162,6 +162,7 @@ class NodesController(object):
                 node_kwargs = deepcopy(request.json)
                 _id = str(uuid.uuid4())
                 node_kwargs['name'] = "%s__%s" % (name, _id)
+                node_kwargs['script'] = script % _id
 
                 provider.create_node(**node_kwargs)
                 node_kwargs.pop('name')
@@ -200,6 +201,7 @@ class NodesController(object):
                 node_kwargs = deepcopy(request.json)
                 _id = str(uuid.uuid4())
                 node_kwargs['name'] = "%s__%s" % (name, _id)
+                node_kwargs['script'] = script % _id
 
                 provider.create_node(**node_kwargs)
                 node_kwargs.pop('name')
