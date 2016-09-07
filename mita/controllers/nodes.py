@@ -7,7 +7,7 @@ from pecan import expose, abort, request, conf
 from mita.models import Node
 from mita.tasks import delete_node
 from mita.connections import jenkins_connection
-from mita import providers
+from mita import providers, models
 from mita.util import NodeState, delete_jenkins_node, delete_provider_node
 from mita.exceptions import CloudNodeNotFound
 
@@ -128,6 +128,9 @@ class NodesController(object):
         size = _json['size']
         labels = _json['labels']
         script = _json['script']
+        count = _json.get('count', 1)
+        # a buffered count is 3/4 what is needed rounded up
+        buffered_count = int(round(count * 0.75))
         existing_nodes = Node.filter_by(
             name=name,
             keyname=keyname,
@@ -135,12 +138,10 @@ class NodesController(object):
             size=size,
         ).all()
 
-        # slap the UUID into the new node details
-        _id = str(uuid.uuid4())
-        _json['name'] = "%s__%s" % (name, _id)
         # try to slap it into the script, it is not OK if we are not allowed to, assume we should
+        # this is just a validation step, should be taken care of by proper schema validation.
         try:
-            _json['script'] = script % _id
+            script % '0000-aaaaa'
         except TypeError:
             logger.error('attempted to add a UUID to the script but failed')
             logger.error(
@@ -151,42 +152,65 @@ class NodesController(object):
         logger.info('checking if an existing node matches required labels: %s', str(labels))
         matching_nodes = [n for n in existing_nodes if n.labels_match(labels)]
         if not matching_nodes:  # we don't have anything that matches this that has been ever created
-            logger.info('no matching nodes were found, will create one')
-            logger.warning('creating node with details: %s' % str(_json))
-            provider.create_node(**_json)
-            _json.pop('name')
-            Node(
-                name=request.json['name'],
-                identifier=_id,
-                **_json
+            logger.info('job needs %s nodes to get unstuck', count)
+            logger.info(
+                'no matching nodes were found, will create new ones. count: %s',
+                buffered_count
             )
+            for i in range(buffered_count):
+                # slap the UUID into the new node details
+                node_kwargs = deepcopy(request.json)
+                _id = str(uuid.uuid4())
+                node_kwargs['name'] = "%s__%s" % (name, _id)
+                node_kwargs['script'] = script % _id
+
+                provider.create_node(**node_kwargs)
+                node_kwargs.pop('name')
+                Node(
+                    name=name,
+                    identifier=_id,
+                    **node_kwargs
+                )
+                models.commit()
         else:
             logger.info('found existing nodes that match labels: %s', len(matching_nodes))
             now = datetime.utcnow()
             # we have something that matches, go over all of them and check:
-            # if *all of them* are over 8 (by default) minutes since creation.
+            # if *all of them* are over 6 (by default) minutes since creation.
             # that means that they are probably busy, so create a new one
+            already_created_nodes = 0
             for n in matching_nodes:
                 difference = now - n.created
                 if difference.seconds < 360:  # 6 minutes
-                    logger.info(
-                        'a matching node was already created %s seconds ago (less than 6 minutes): %s',
-                        difference.seconds,
-                        n.name
-                    )
-                    logger.info('will not create one')
-                    return
-                    # FIXME: need to check with cloud provider and see if this
-                    # node is running, otherwise it means this node is dead and
-                    # should be removed from the DB
-            logger.info('no nodes created recently, will create a new one')
-            provider.create_node(**_json)
-            _json.pop('name')
-            Node(
-                name=request.json['name'],
-                identifier=_id,
-                **_json
+                    already_created_nodes += 1
+            if already_created_nodes > count:
+                logger.info('job needs %s nodes to get unstuck', count)
+                logger.info(
+                    'but there are %s node(s) already created 6 minutes ago',
+                    already_created_nodes
+                )
+                logger.info('will not create one')
+                return
+            logger.info('job needs %s nodes to get unstuck', count)
+            logger.info(
+                'no nodes created recently enough, will create new ones. count: %s',
+                buffered_count
             )
+            for i in range(buffered_count):
+                # slap the UUID into the new node details
+                node_kwargs = deepcopy(request.json)
+                _id = str(uuid.uuid4())
+                node_kwargs['name'] = "%s__%s" % (name, _id)
+                node_kwargs['script'] = script % _id
+
+                provider.create_node(**node_kwargs)
+                node_kwargs.pop('name')
+                Node(
+                    name=name,
+                    identifier=_id,
+                    **node_kwargs
+                )
+                models.commit()
 
     @expose('json')
     def _lookup(self, node_name, *remainder):

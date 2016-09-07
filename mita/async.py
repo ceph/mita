@@ -131,6 +131,7 @@ def check_queue():
     jenkins_token = pecan.conf.jenkins['token']
     conn = jenkins.Jenkins(jenkins_url, jenkins_user, jenkins_token)
     result = conn.get_queue_info()
+    needed_nodes = {}
 
     if result:
         for task in result:
@@ -184,10 +185,10 @@ def check_queue():
                     #      being asked to create.
                     #      * if found/matched:
                     #        - log the warnings again, something is not working right.
-                    node_endpoint = get_mita_api('nodes')
-                    configured_node = pecan.conf.nodes[node_name]
-                    configured_node['name'] = node_name
-                    requests.post(node_endpoint, data=json.dumps(configured_node))
+                    if needed_nodes.get(node_name):
+                        needed_nodes[node_name] += 1
+                    else:
+                        needed_nodes[node_name] = 1
                 else:
                     logger.warning('could not match a node name to config for labels')
             else:
@@ -196,6 +197,15 @@ def check_queue():
         logger.info('the Jenkins queue is empty, nothing to do')
     else:
         logger.warning('attempted to get queue info but got: %s' % result)
+    # At this point we might have a bag of nodes that we need to create, go over that
+    # mapping and ask as many as Jenkins needs:
+    node_endpoint = get_mita_api('nodes')
+    for node_name, count in needed_nodes.items():
+        configured_node = pecan.conf.nodes[node_name]
+        configured_node['name'] = node_name
+        configured_node['count'] = count
+        requests.post(node_endpoint, data=json.dumps(configured_node))
+
 
 
 @app.task
