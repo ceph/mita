@@ -62,8 +62,17 @@ def check_idling():
             uuid = n['name'].split('__')[-1]
             if node_info.get('idle'):
                 logging.info("found an idle node: %s" % n['name'])
-                node_endpoint = get_mita_api('nodes', uuid, 'idle')
-                requests.post(node_endpoint)
+                # check to see if this node is still in the db
+                node = models.Node.query.filter_by(identifier=uuid).first()
+                if node:
+                    # node is still in the db, mark it as idle
+                    node_endpoint = get_mita_api('nodes', uuid, 'idle')
+                    requests.post(node_endpoint)
+                else:
+                    # node is not in the db, this means a mita node
+                    # has been orphaned somehow in jenkins and needs deleted
+                    logging.info("node: %s was not found in the db" % n['name'])
+                    util.delete_jenkins_node(n['name'])
             else:
                 logger.info('%s is not idle, reset node.idle_since' % n['name'])
                 node_endpoint = get_mita_api('nodes', uuid, 'active')
