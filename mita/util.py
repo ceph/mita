@@ -6,7 +6,6 @@ import logging
 
 from mita.connections import jenkins_connection
 from mita.exceptions import CloudNodeNotFound
-from mita import providers
 from mita.label_eval import matching_nodes
 
 
