@@ -246,3 +246,16 @@ class TestFromOfflineExecutor(object):
 
     def test_none_node_does_not_break(self):
         assert util.from_offline_executor(None) is None
+
+
+class TestJobFromUrl(object):
+
+    def test_url_with_job_in_the_name(self):
+        url = u'https://jenkins.ceph.com/job/jenkins-job-builder'
+        result = util.job_from_url(url)
+        assert result == 'jenkins-job-builder'
+
+    def test_url_with_trailing_slash__gets_trimmed(self):
+        url = u'https://jenkins.ceph.com/job/jenkins-job-builder/'
+        result = util.job_from_url(url)
+        assert result == 'jenkins-job-builder'
