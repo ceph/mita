@@ -195,6 +195,7 @@ def from_offline_label(string):
     # otherwise, fallback to multi-labels, like 'amd64&&trusty'
     if not single_label_match:
         return from_offline_node_label(label)
+    return single_label_match
 
 
 def from_offline_node(string):
