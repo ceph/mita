@@ -147,7 +147,7 @@ def check_queue():
                 if not node_name:
                     logger.warning('unable to match a suitable node')
                     logger.warning('will infer from builtOn')
-                    job_name = task['task']['url'].split('job')[-1].split('/')[1]
+                    job_name = util.job_from_url(task['task']['url'])
                     job_id = conn.get_job_info(job_name)['nextBuildNumber']-1
                     logger.info('determined job name as: %s' % job_name)
                     logger.info('will look for build info on: %s id: %s' % (job_name, job_id))
