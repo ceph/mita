@@ -6,11 +6,17 @@ import logging
 
 from mita.connections import jenkins_connection
 from mita.exceptions import CloudNodeNotFound
-from mita import providers
 from mita.label_eval import matching_nodes
 
 
 logger = logging.getLogger(__name__)
+
+
+def job_from_url(url):
+    """
+    Infer the ``job_name`` from a Jenkins url
+    """
+    return url.strip('/').split('/')[-1]
 
 
 def node_state_map():
@@ -189,6 +195,7 @@ def from_offline_label(string):
     # otherwise, fallback to multi-labels, like 'amd64&&trusty'
     if not single_label_match:
         return from_offline_node_label(label)
+    return single_label_match
 
 
 def from_offline_node(string):
