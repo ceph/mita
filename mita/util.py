@@ -12,6 +12,13 @@ from mita.label_eval import matching_nodes
 logger = logging.getLogger(__name__)
 
 
+def job_from_url(url):
+    """
+    Infer the ``job_name`` from a Jenkins url
+    """
+    return url.strip('/').split('/')[-1]
+
+
 def node_state_map():
     """
     creates a forward and reverse mapping of node states assumes values for
