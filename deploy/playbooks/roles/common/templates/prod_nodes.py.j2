@@ -23,39 +23,42 @@ nodes = {
         'labels': ['amd64', 'x86_64', 'precise', 'huge', 'rebootable'],
         'provider': 'openstack'
     },
-    'wheezy_small': {
-        'script': dedent("""#!/bin/bash
-        apt-get update && apt-get install -y -q curl
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+wheezy+small+x86_64+rebootable&nodename=wheezy_small__%s" | bash
-        """),
-        'keyname': keyname,
-        'image_name': 'Debian 7',
-        'size': 'vps-ssd-1',
-        'labels': ['amd64', 'x86_64', 'wheezy', 'small', 'rebootable'],
-        'provider': 'openstack'
-    },
-    'wheezy_huge': {
-        'script': dedent("""#!/bin/bash
-        apt-get update && apt-get install -y -q curl
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+wheezy+huge+x86_64+rebootable&nodename=wheezy_huge__%s" | bash
-        """),
-        'keyname': keyname,
-        'image_name': 'Debian 7',
-        'size': 'hg-30-ssd',
-        'labels': ['amd64', 'x86_64', 'wheezy', 'huge', 'rebootable'],
-        'provider': 'openstack'
-    },
-    'jessie_small': {
-        'script': dedent("""#!/bin/bash
-        apt-get update && apt-get install -y -q curl
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+jessie+small+x86_64+rebootable&nodename=jessie_small__%s" | bash
-        """),
-        'keyname': keyname,
-        'image_name': 'Debian 8',
-        'size': 'vps-ssd-1',
-        'labels': ['amd64', 'x86_64', 'jessie', 'small', 'rebootable'],
-        'provider': 'openstack'
-    },
+# XXX Currently disabled because we don't have pre-fab images that contain installed deps. This particular
+# machine can take +40 minutes to get ready (vs. 6 minutes for other nodes). It is only used for Ceph builds
+# so this service is now configuring a "pbuilder" machine (Ubuntu Trusty) that can build Wheezy.
+#    'wheezy_small': {
+#        'script': dedent("""#!/bin/bash
+#        apt-get update && apt-get install -y -q curl
+#        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+wheezy+small+x86_64+rebootable&nodename=wheezy_small__%s" | bash
+#        """),
+#        'keyname': keyname,
+#        'image_name': 'Debian 7',
+#        'size': 'vps-ssd-1',
+#        'labels': ['amd64', 'x86_64', 'wheezy', 'small', 'rebootable'],
+#        'provider': 'openstack'
+#    },
+#    'wheezy_huge': {
+#        'script': dedent("""#!/bin/bash
+#        apt-get update && apt-get install -y -q curl
+#        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+wheezy+huge+x86_64+rebootable&nodename=wheezy_huge__%s" | bash
+#        """),
+#        'keyname': keyname,
+#        'image_name': 'Debian 7',
+#        'size': 'hg-30-ssd',
+#        'labels': ['amd64', 'x86_64', 'wheezy', 'huge', 'rebootable'],
+#        'provider': 'openstack'
+#   },
+#    'jessie_small': {
+#        'script': dedent("""#!/bin/bash
+#        apt-get update && apt-get install -y -q curl
+#        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+jessie+small+x86_64+rebootable&nodename=jessie_small__%s" | bash
+#        """),
+#        'keyname': keyname,
+#        'image_name': 'Debian 8',
+#        'size': 'vps-ssd-1',
+#        'labels': ['amd64', 'x86_64', 'jessie', 'small', 'rebootable'],
+#        'provider': 'openstack'
+#    },
 # XXX Currently disabled because we don't have pre-fab images that contain installed deps. This particular
 # machine can take +40 minutes to get ready (vs. 6 minutes for other nodes). It is only used for Ceph builds
 # so this service is now configuring a "pbuilder" machine (Ubuntu Trusty) that can build Jessie.
