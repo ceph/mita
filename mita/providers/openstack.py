@@ -101,8 +101,22 @@ def _wait_until_volume_available(volume, maybe_in_use=False):
     currently in_use. For example, set this option if you're recycling
     this volume from an old node that you've very recently
     destroyed.
+
+    This is the value of driver.VOLUME_STATE_MAP from libcloud as reference::
+
+        {'attaching': 7,
+         'available': 0,
+         'backing-up': 6,
+         'creating': 3,
+         'deleting': 4,
+         'error': 1,
+         'error_deleting': 1,
+         'error_extending': 1,
+         'error_restoring': 1,
+         'in-use': 2,
+         'restoring-backup': 6}
     """
-    ok_states = ['creating']  # it's ok to wait if the volume is in this
+    ok_states = ['creating', 3]  # it's ok to wait if the volume is in this
     tries = 0
     if maybe_in_use:
         ok_states.append('in_use')
@@ -118,8 +132,8 @@ def _wait_until_volume_available(volume, maybe_in_use=False):
             logger.error('no volume was found for: %s', volume.name)
             break
         logger.info(' ... %s', volume.state)
-    if volume.state != 'available':
-        # OVH uses a non-standard state of 3 to indicate an available volume
+    if volume.state not in ['available', 0]:
+        # OVH uses a non-standard state of 0 to indicate an available volume
         logger.info('Volume %s is %s (not available)', volume.name, volume.state)
         logger.info('The volume %s is not available, but will continue anyway...', volume.name)
     return True
