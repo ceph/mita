@@ -1,5 +1,5 @@
 from pecan import expose
-from mita.controllers import nodes
+from mita.controllers import nodes, health
 
 
 class ApiController(object):
@@ -14,3 +14,4 @@ class RootController(object):
         return dict()
 
     api = ApiController()
+    health = health.HealthController()
