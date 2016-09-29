@@ -138,7 +138,7 @@ nodes = {
     },
     'centos6_small': {
         'script': dedent("""#!/bin/bash
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=2&labels=amd64+centos6+x86_64+small+rebootable&nodename=centos6_small__%s" | bash"""),
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+centos6+x86_64+small+rebootable&nodename=centos6_small__%s" | bash"""),
         'keyname': keyname,
         'image_name': 'Centos 6',
         'size': 'vps-ssd-1',
@@ -147,7 +147,7 @@ nodes = {
     },
     'centos6_huge': {
         'script': dedent("""#!/bin/bash
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=2&labels=amd64+centos6+x86_64+huge+rebootable&nodename=centos6_huge__%s" | bash"""),
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+centos6+x86_64+huge+rebootable&nodename=centos6_huge__%s" | bash"""),
         'keyname': keyname,
         'image_name': 'Centos 6',
         'size': 'hg-30-ssd',
@@ -166,7 +166,7 @@ nodes = {
     },
     'centos7_small': {
         'script': dedent("""#!/bin/bash
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=2&labels=amd64+centos7+small+x86_64+rebootable&nodename=centos7_small__%s" | bash"""),
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+centos7+small+x86_64+rebootable&nodename=centos7_small__%s" | bash"""),
         'keyname': keyname,
         'image_name': 'ceph-builders-C7.2-1.0.1',
         'size': 'vps-ssd-1',
@@ -175,7 +175,7 @@ nodes = {
     },
     'centos7_huge': {
         'script': dedent("""#!/bin/bash
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=2&labels=amd64+centos7+huge+x86_64+rebootable&nodename=centos7_huge__%s" | bash"""),
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+centos7+huge+x86_64+rebootable&nodename=centos7_huge__%s" | bash"""),
         'keyname': keyname,
         'image_name': 'ceph-builders-C7.2-1.0.1',
         'size': 'hg-30-ssd',
