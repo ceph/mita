@@ -3,6 +3,8 @@ from libcloud.compute import types
 from jenkins import NotFoundException as JenkinsNotFoundException
 from pecan import conf
 import logging
+import os
+import requests
 
 from mita.connections import jenkins_connection
 from mita.exceptions import CloudNodeNotFound
@@ -350,3 +352,31 @@ def delete_provider_node(provider, name):
         logger.info("Node does not exist in cloud provider, cannot delete")
     except Exception:
         logger.exception("encountered errors while trying to delete node from cloud provider")
+
+
+def match_node_from_job_config(job_url):
+    config_url = os.path.join(job_url, "config.xml")
+    logger.info("Getting job config from: %s", config_url)
+    response = requests.get(config_url, auth=(conf.jenkins['user'], conf.jenkins['token']))
+    # if retrieving the config.xml fails, raise an error
+    response.raise_for_status()
+    element_tree = ElementTree(response.text)
+    label_expression = element_tree.find('assignedNode').text
+    logger.info("Found label expression: %s", label_expression)
+    node = match_node_from_label_expr(label_expression)
+    return node
+
+
+def match_node_from_matrix_job_name(job_name):
+    """
+    A matrix job name will look something like:
+
+    ARCH=x86_64,AVAILABLE_ARCH=x86_64,AVAILABLE_DIST=xenial,DIST=xenial,MACHINE_SIZE=huge
+    """
+    logger.info("Infering labels from matrix job_name: %s", job_name)
+    labels = job_name.split(",")
+    labels = [label.split("=")[1] for label in labels]
+    labels = list(set(labels))
+    logger.info("Found labels: %s", labels)
+    node = match_node_from_labels(labels)
+    return node
