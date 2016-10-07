@@ -264,3 +264,36 @@ class TestJobFromUrl(object):
         url = u'https://jenkins.ceph.com/job/ceph-dev-build/ARCH=x86_64,AVAILABLE_ARCH=x86_64,AVAILABLE_DIST=xenial,DIST=xenial,MACHINE_SIZE=huge/'
         result = util.job_from_url(url)
         assert result == "ARCH=x86_64,AVAILABLE_ARCH=x86_64,AVAILABLE_DIST=xenial,DIST=xenial,MACHINE_SIZE=huge"
+
+
+class TestMatchNodeFromMatrixJobName(object):
+
+    def setup(self):
+        self.default_conf = {
+            'nodes': {'wheezy': {'labels': ['amd64', 'debian']}},
+            'jenkins': {
+                'url': 'http://jenkins.example.com',
+                'user': 'alfredo',
+                'token': 'secret'},
+        }
+        set_config(self.default_conf, overwrite=True)
+
+    def test_finds_a_node(self):
+        job_name = "ARCH=amd64,DIST=debian"
+        result = util.match_node_from_matrix_job_name(job_name)
+        assert result == "wheezy"
+
+    def test_does_not_find_a_node(self):
+        job_name = "DIST=xenial"
+        result = util.match_node_from_matrix_job_name(job_name)
+        assert not result
+
+    def test_finds_node_partial_match(self):
+        job_name = "DIST=debian"
+        result = util.match_node_from_matrix_job_name(job_name)
+        assert result == "wheezy"
+
+    def test_duplicate_labels_in_name(self):
+        job_name = "DIST=debian,AVAILABLE_DIST=debian"
+        result = util.match_node_from_matrix_job_name(job_name)
+        assert result == "wheezy"
