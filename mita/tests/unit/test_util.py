@@ -259,3 +259,8 @@ class TestJobFromUrl(object):
         url = u'https://jenkins.ceph.com/job/jenkins-job-builder/'
         result = util.job_from_url(url)
         assert result == 'jenkins-job-builder'
+
+    def test_url_from_a_matrix_job(self):
+        url = u'https://jenkins.ceph.com/job/ceph-dev-build/ARCH=x86_64,AVAILABLE_ARCH=x86_64,AVAILABLE_DIST=xenial,DIST=xenial,MACHINE_SIZE=huge/'
+        result = util.job_from_url(url)
+        assert result == "ARCH=x86_64,AVAILABLE_ARCH=x86_64,AVAILABLE_DIST=xenial,DIST=xenial,MACHINE_SIZE=huge"
