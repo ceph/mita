@@ -360,8 +360,12 @@ def match_node_from_job_config(job_url):
     response = requests.get(config_url, auth=(conf.jenkins['user'], conf.jenkins['token']))
     # if retrieving the config.xml fails, raise an error
     response.raise_for_status()
-    element_tree = ElementTree(response.text)
-    label_expression = element_tree.find('assignedNode').text
+    element_tree = ElementTree.fromstring(response.text)
+    try:
+        label_expression = element_tree.find('assignedNode').text
+    except AttributeError:
+        logger.warning("Did not find 'assignedNode' in job config %s", job_url)
+        return None
     logger.info("Found label expression: %s", label_expression)
     node = match_node_from_label_expr(label_expression)
     return node

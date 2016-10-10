@@ -2,6 +2,8 @@ import pytest
 from pecan import set_config
 from mita import util
 
+from mock import patch, MagicMock
+
 BecauseNodeIsBusy = 'Waiting for next available executor on %s'
 BecauseLabelIsBusy = BecauseNodeIsBusy
 BecauseLabelIsOffline = u"All nodes of label \u2018%s\u2019 are offline"
@@ -297,3 +299,34 @@ class TestMatchNodeFromMatrixJobName(object):
         job_name = "DIST=debian,AVAILABLE_DIST=debian"
         result = util.match_node_from_matrix_job_name(job_name)
         assert result == "wheezy"
+
+
+class TestMatchNodeFromJobConfig(object):
+
+    def setup(self):
+        self.default_conf = {
+            'nodes': {'wheezy': {'labels': ['amd64', 'debian']}},
+            'jenkins': {
+                'url': 'http://jenkins.example.com',
+                'user': 'alfredo',
+                'token': 'secret'},
+        }
+        set_config(self.default_conf, overwrite=True)
+
+    @patch("mita.util.requests")
+    def test_finds_labels(self, m_requests):
+        mock_response = MagicMock()
+        job_config = '<?xml version="1.0" encoding="UTF-8"?><project><assignedNode>amd64 &amp;&amp; debian</assignedNode></project>'
+        mock_response.text = job_config
+        m_requests.get.return_value = mock_response
+        result = util.match_node_from_job_config("https://jenkins.ceph.com/job/ceph-pull-requests")
+        assert result == "wheezy"
+
+    @patch("mita.util.requests")
+    def test_does_not_find_labels(self, m_requests):
+        mock_response = MagicMock()
+        job_config = '<?xml version="1.0" encoding="UTF-8"?><project></project>'
+        mock_response.text = job_config
+        m_requests.get.return_value = mock_response
+        result = util.match_node_from_job_config("https://jenkins.ceph.com/job/ceph-pull-requests")
+        assert not result
