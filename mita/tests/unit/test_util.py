@@ -1,6 +1,9 @@
+import requests
 import pytest
+
 from pecan import set_config
 from mita import util
+
 
 from mock import patch, MagicMock
 
@@ -327,6 +330,14 @@ class TestMatchNodeFromJobConfig(object):
         mock_response = MagicMock()
         job_config = '<?xml version="1.0" encoding="UTF-8"?><project></project>'
         mock_response.text = job_config
+        m_requests.get.return_value = mock_response
+        result = util.match_node_from_job_config("https://jenkins.ceph.com/job/ceph-pull-requests")
+        assert not result
+
+    @patch("mita.util.requests")
+    def test_failed_to_fetch_job_config(self, m_requests):
+        mock_response = MagicMock()
+        mock_response.raise_for_status.side_effect = requests.exceptions.RequestException()
         m_requests.get.return_value = mock_response
         result = util.match_node_from_job_config("https://jenkins.ceph.com/job/ceph-pull-requests")
         assert not result

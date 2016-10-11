@@ -358,8 +358,11 @@ def match_node_from_job_config(job_url):
     config_url = os.path.join(job_url, "config.xml")
     logger.info("Getting job config from: %s", config_url)
     response = requests.get(config_url, auth=(conf.jenkins['user'], conf.jenkins['token']))
-    # if retrieving the config.xml fails, raise an error
-    response.raise_for_status()
+    try:
+        response.raise_for_status()
+    except Exception:
+        logger.exception("failed to retrieve job config from: %s", job_url)
+        return None
     element_tree = ElementTree.fromstring(response.text)
     try:
         label_expression = element_tree.find('assignedNode').text
