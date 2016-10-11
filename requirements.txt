@@ -5,3 +5,5 @@ sqlalchemy
 celery[librabbitmq]
 alembic
 python-jenkins
+requests
+apache-libcloud

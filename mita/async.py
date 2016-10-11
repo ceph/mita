@@ -145,22 +145,23 @@ def check_queue():
                 logger.info('reason was: %s' % task['why'])
                 node_name = util.match_node(task['why'])
                 if not node_name:
+                    # this usually happens when jenkins is waiting on an executor
+                    # on a static slave whose labels are not a subset of a
+                    # node in the mita config
                     logger.warning('unable to match a suitable node')
-                    logger.warning('will infer from builtOn')
-                    job_name = util.job_from_url(task['task']['url'])
-                    job_id = conn.get_job_info(job_name)['nextBuildNumber']-1
-                    logger.info('determined job name as: %s' % job_name)
-                    logger.info('will look for build info on: %s id: %s' % (job_name, job_id))
+                    logger.warning('will infer from job labels')
+                    job_url = task['task']['url']
+                    job_name = util.job_from_url(job_url)
                     try:
-                        build = conn.get_build_info(job_name, job_id)
+                        conn.get_job_info(job_name)
+                        logger.info("Job info found for: %s", job_name)
+                        node_name = util.match_node_from_job_config(job_url)
                     except jenkins.NotFoundException:
-                        logger.warning('there are no builds available for job')
-                        continue
-                    logger.info('found a build')
-                    node_name = util.from_offline_executor(build['builtOn'])
+                        logger.warning('No job info found for: %s', job_name)
+                        logger.warning('Will assume the job is a matrix job')
+                        node_name = util.match_node_from_matrix_job_name(job_name)
                     if not node_name:
                         logger.warning('completely unable to match a node to provide')
-                        logger.warning(str(build))
                         continue
                 logger.info('inferred node as: %s' % str(node_name))
                 if node_name:

@@ -1,6 +1,11 @@
+import requests
 import pytest
+
 from pecan import set_config
 from mita import util
+
+
+from mock import patch, MagicMock
 
 BecauseNodeIsBusy = 'Waiting for next available executor on %s'
 BecauseLabelIsBusy = BecauseNodeIsBusy
@@ -259,3 +264,80 @@ class TestJobFromUrl(object):
         url = u'https://jenkins.ceph.com/job/jenkins-job-builder/'
         result = util.job_from_url(url)
         assert result == 'jenkins-job-builder'
+
+    def test_url_from_a_matrix_job(self):
+        url = u'https://jenkins.ceph.com/job/ceph-dev-build/ARCH=x86_64,AVAILABLE_ARCH=x86_64,AVAILABLE_DIST=xenial,DIST=xenial,MACHINE_SIZE=huge/'
+        result = util.job_from_url(url)
+        assert result == "ARCH=x86_64,AVAILABLE_ARCH=x86_64,AVAILABLE_DIST=xenial,DIST=xenial,MACHINE_SIZE=huge"
+
+
+class TestMatchNodeFromMatrixJobName(object):
+
+    def setup(self):
+        self.default_conf = {
+            'nodes': {'wheezy': {'labels': ['amd64', 'debian']}},
+            'jenkins': {
+                'url': 'http://jenkins.example.com',
+                'user': 'alfredo',
+                'token': 'secret'},
+        }
+        set_config(self.default_conf, overwrite=True)
+
+    def test_finds_a_node(self):
+        job_name = "ARCH=amd64,DIST=debian"
+        result = util.match_node_from_matrix_job_name(job_name)
+        assert result == "wheezy"
+
+    def test_does_not_find_a_node(self):
+        job_name = "DIST=xenial"
+        result = util.match_node_from_matrix_job_name(job_name)
+        assert not result
+
+    def test_finds_node_partial_match(self):
+        job_name = "DIST=debian"
+        result = util.match_node_from_matrix_job_name(job_name)
+        assert result == "wheezy"
+
+    def test_duplicate_labels_in_name(self):
+        job_name = "DIST=debian,AVAILABLE_DIST=debian"
+        result = util.match_node_from_matrix_job_name(job_name)
+        assert result == "wheezy"
+
+
+class TestMatchNodeFromJobConfig(object):
+
+    def setup(self):
+        self.default_conf = {
+            'nodes': {'wheezy': {'labels': ['amd64', 'debian']}},
+            'jenkins': {
+                'url': 'http://jenkins.example.com',
+                'user': 'alfredo',
+                'token': 'secret'},
+        }
+        set_config(self.default_conf, overwrite=True)
+
+    @patch("mita.util.requests")
+    def test_finds_labels(self, m_requests):
+        mock_response = MagicMock()
+        job_config = '<?xml version="1.0" encoding="UTF-8"?><project><assignedNode>amd64 &amp;&amp; debian</assignedNode></project>'
+        mock_response.text = job_config
+        m_requests.get.return_value = mock_response
+        result = util.match_node_from_job_config("https://jenkins.ceph.com/job/ceph-pull-requests")
+        assert result == "wheezy"
+
+    @patch("mita.util.requests")
+    def test_does_not_find_labels(self, m_requests):
+        mock_response = MagicMock()
+        job_config = '<?xml version="1.0" encoding="UTF-8"?><project></project>'
+        mock_response.text = job_config
+        m_requests.get.return_value = mock_response
+        result = util.match_node_from_job_config("https://jenkins.ceph.com/job/ceph-pull-requests")
+        assert not result
+
+    @patch("mita.util.requests")
+    def test_failed_to_fetch_job_config(self, m_requests):
+        mock_response = MagicMock()
+        mock_response.raise_for_status.side_effect = requests.exceptions.RequestException()
+        m_requests.get.return_value = mock_response
+        result = util.match_node_from_job_config("https://jenkins.ceph.com/job/ceph-pull-requests")
+        assert not result
