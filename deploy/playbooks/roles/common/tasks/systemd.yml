@@ -1,0 +1,43 @@
+---
+
+- name: ensure /var/log/celery dir exists
+  sudo: true
+  file: path=/var/log/celery state=directory owner={{ ansible_ssh_user }} group={{ ansible_ssh_user }} recurse=yes
+
+- name: ensure /etc/default/ dir exists
+  sudo: true
+  file: path=/etc/default state=directory
+
+- name: install the systemd configuration file for celery
+  template: src=systemd/mita.sysconfig.j2 dest=/etc/default/mita
+  sudo: true
+
+- name: install the systemd unit file for mita 
+  template: src=systemd/mita.service.j2 dest=/etc/systemd/system/mita.service
+  sudo: true
+  notify:
+     - reload systemd
+
+- name: install the systemd unit file for celery
+  template: src=systemd/mita-celery.service.j2 dest=/etc/systemd/system/mita-celery.service
+  sudo: true
+  notify:
+     - reload systemd
+
+- name: install the systemd unit file for celerybeat
+  template: src=systemd/mita-celerybeat.service.j2 dest=/etc/systemd/system/mita-celerybeat.service
+  sudo: true
+  notify:
+     - reload systemd
+
+- name: ensure mita is enabled and running
+  sudo: true
+  service: name=mita state=running enabled=yes
+
+- name: ensure mita-celery is enabled and running
+  sudo: true
+  service: name=mita-celery state=running enabled=yes
+
+- name: ensure mita-celerybeat is enabled and running
+  sudo: true
+  service: name=mita-celerybeat state=running enabled=yes
