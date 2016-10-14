@@ -1,0 +1,39 @@
+---
+# install python2.7 on xenial nodes
+- hosts: all
+  sudo: yes
+  user: admin 
+  gather_facts: false
+  tasks:
+    - name: install python-simplejson
+      raw: sudo apt-get -y install python-simplejson
+      # so that this is ignored on rpm nodes
+      failed_when: false
+
+- hosts: all
+  user: admin
+  roles:
+    - common
+  vars:
+     app_name: "mita"
+     prod_fqdn: "mita.ceph.com"
+     fqdn: "mita.ceph.com"
+     short_hostname: "mita"
+     use_ssl: true
+     wsgi_file: wsgi.py
+     wsgi_callable: application
+     ansible_ssh_port: 2222
+     branch: "master"
+     development_server: false
+     self_signed_ssl: true
+     # All these below are required on the first deploy
+     # and if provided will create configuration files
+     # used by mita
+     #provider_user: "provider-user"
+     #provider_password: "provider-password"
+     #jenkins_url: "https://jenkins.ceph.com"
+     #jenkins_user: "user"
+     #jenkins_token: "token"
+     #jenkins_prado_token: "jenkins-prado-token"
+     #prado_url: "http://prado.ceph.com"
+     #prado_token: "prado-token"
