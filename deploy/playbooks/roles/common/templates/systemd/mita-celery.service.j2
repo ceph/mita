@@ -11,7 +11,9 @@ User={{ ansible_ssh_user }}
 WorkingDirectory={{ app_home }}/src/{{ app_name }}/{{ app_name }}
 StandardOutput=journal
 StandardError=journal
-ExecStart={{ app_home }}/bin/celery -A async worker --loglevel=info   
+ExecStart={{ app_home }}/bin/celery multi start mita -A async --logfile=/var/log/celery/%n%I.log
+ExecStop={{ app_home }}/bin/celery multi stopwait mita --pidfile=%n.pid
+ExecReload={{ app_home }}/bin/celery multi restart mita -A async --logfile=/var/log/celery/%n%I.log
 
 [Install]
 WantedBy=multi-user.target
