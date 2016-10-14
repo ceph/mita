@@ -9,7 +9,7 @@
   sudo: yes
   lineinfile:
      # TODO: should not hardcode that version
-     dest: /etc/postgresql/9.3/main/pg_hba.conf
+     dest: /etc/postgresql/9.5/main/pg_hba.conf
      regexp: '^host\s+all\s+all\s+127.0.0.1/32'
      line: 'host    all             all             127.0.0.1/32            md5'
      backrefs: yes
@@ -61,8 +61,8 @@
     dest: "{{ app_home }}/src/{{ app_name }}/prod_db.py"
   notify:
     - restart app
-    - restart celery
-    - restart celery beat
+    - restart mita-celery
+    - restart mita-celerybeat
 
 # this needs to be here because it needs the new db password
 - name: create the prod alembic.ini file
