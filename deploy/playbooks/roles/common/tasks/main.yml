@@ -1,9 +1,22 @@
 ---
+- name: "Build hosts file"
+  sudo: yes
+  template:
+    src: hosts.j2
+    dest: "/etc/hosts"
+
+- name: Set Hostname with hostname command
+  sudo: yes
+  hostname: name="{{ short_hostname }}"
+  when: short_hostname is defined
 
 - name: "ensure a home for {{ app_name }}"
   sudo: yes
   file: path={{ app_home }} owner={{ ansible_ssh_user }} group={{ ansible_ssh_user }} state=directory recurse=yes
   register: app_home_created
+
+# rabbitmq must be installed after the hostname is set
+- include: rabbitmq.yml
 
 - name: Update apt cache
   apt:
