@@ -58,19 +58,19 @@ nodes = {
 #    },
     'ceph_ansible_pr_trusty': {
         'script': dedent("""#!/bin/bash
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=ceph_ansible_pr_trusty&nodename=ceph_ansible_pr_trusty__%s" | bash
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=ceph_ansible_pr_trusty+ephemeral+libvirt&nodename=ceph_ansible_pr_trusty__%s" | bash
         """),
         'keyname': keyname,
         'image_name': 'Ubuntu 14.04',
         'size': 'vps-ssd-1',
-        'labels': ['ephemeral', 'ceph_ansible_pr_trusty'],
+        'labels': ['ephemeral', 'libvirt', 'ceph_ansible_pr_trusty'],
         'provider': 'openstack',
         'storage': 10
     },
     'ceph_ansible_pr_xenial': {
         'script': dedent("""#!/bin/bash
         apt-get install -y python
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave_libvirt/?token={{ jenkins_prado_token }}&executors=1&labels=ceph_ansible_pr_xenial+libvirt+vagrant&nodename=ceph_ansible_pr_xenial__%s" | bash
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave_libvirt/?token={{ jenkins_prado_token }}&executors=1&labels=ceph_ansible_pr_xenial+ephemeral+libvirt+vagrant&nodename=ceph_ansible_pr_xenial__%s" | bash
         """),
         'keyname': keyname,
         'image_name': 'Ubuntu 16.04',
@@ -80,7 +80,7 @@ nodes = {
     },
     'trusty_small': {
         'script': dedent("""#!/bin/bash
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+trusty+small+x86_64+rebootable&nodename=trusty_small__%s" | bash
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+ephemeral+trusty+small+x86_64+rebootable&nodename=trusty_small__%s" | bash
         """),
         'keyname': keyname,
         'image_name': 'Ubuntu 14.04',
@@ -90,7 +90,7 @@ nodes = {
     },
     'jessie_trusty_pbuilder_huge': {
         'script': dedent("""#!/bin/bash
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+huge+jessie+x86_64+rebootable+trusty-pbuilder&nodename=jessie_trusty_pbuilder_huge__%s" | bash
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+ephemeral+huge+jessie+x86_64+rebootable+trusty-pbuilder&nodename=jessie_trusty_pbuilder_huge__%s" | bash
         """),
         'keyname': keyname,
         'image_name': 'Ubuntu 14.04',
@@ -100,7 +100,7 @@ nodes = {
     },
     'xenial_trusty_pbuilder_huge': {
         'script': dedent("""#!/bin/bash
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=trusty+amd64+huge+xenial+x86_64+rebootable+trusty-pbuilder&nodename=xenial_trusty_pbuilder_huge__%s" | bash
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=trusty+amd64+ephemeral+huge+xenial+x86_64+rebootable+trusty-pbuilder&nodename=xenial_trusty_pbuilder_huge__%s" | bash
         """),
         'keyname': keyname,
         'image_name': 'Ubuntu 14.04',
@@ -110,7 +110,7 @@ nodes = {
     },
     'trusty_huge': {
         'script': dedent("""#!/bin/bash
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=xenial+amd64+trusty+huge+x86_64+rebootable+rebootable&nodename=trusty_huge__%s" | bash
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=xenial+amd64+ephemeral+trusty+huge+x86_64+rebootable+rebootable&nodename=trusty_huge__%s" | bash
         """),
         'keyname': keyname,
         'image_name': 'Ubuntu 14.04',
@@ -120,7 +120,7 @@ nodes = {
     },
     'centos6_small': {
         'script': dedent("""#!/bin/bash
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+centos6+x86_64+small+rebootable&nodename=centos6_small__%s" | bash"""),
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+ephemeral+centos6+x86_64+small+rebootable&nodename=centos6_small__%s" | bash"""),
         'keyname': keyname,
         'image_name': 'Centos 6',
         'size': 'vps-ssd-1',
@@ -129,7 +129,7 @@ nodes = {
     },
     'centos6_huge': {
         'script': dedent("""#!/bin/bash
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+centos6+x86_64+huge+rebootable&nodename=centos6_huge__%s" | bash"""),
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+ephemeral+centos6+x86_64+huge+rebootable&nodename=centos6_huge__%s" | bash"""),
         'keyname': keyname,
         'image_name': 'Centos 6',
         'size': 'hg-30-ssd',
@@ -138,16 +138,16 @@ nodes = {
     },
     'ceph_ansible_pr_centos7': {
         'script': dedent("""#!/bin/bash
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave_libvirt/?token={{ jenkins_prado_token }}&executors=1&labels=ceph_ansible_pr_centos7+vagrant+libvirt&nodename=ceph_ansible_pr_centos7__%s" | bash"""),
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave_libvirt/?token={{ jenkins_prado_token }}&executors=1&labels=ephemeral+ceph_ansible_pr_centos7+vagrant+libvirt&nodename=ceph_ansible_pr_centos7__%s" | bash"""),
         'keyname': keyname,
         'image_name': 'Centos 7',
         'size': 'hg-30-flex',
-        'labels': ['ephemeral', 'vagrant', 'ceph-ansible'],
+        'labels': ['ephemeral', 'libvirt', 'vagrant', 'ceph-ansible'],
         'provider': 'openstack'
     },
     'centos7_small': {
         'script': dedent("""#!/bin/bash
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+centos7+small+x86_64+rebootable&nodename=centos7_small__%s" | bash"""),
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+ephemeral+centos7+small+x86_64+rebootable&nodename=centos7_small__%s" | bash"""),
         'keyname': keyname,
         'image_name': 'Centos 7',
         'size': 'vps-ssd-1',
@@ -156,7 +156,7 @@ nodes = {
     },
     'centos7_huge': {
         'script': dedent("""#!/bin/bash
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+centos7+huge+x86_64+rebootable&nodename=centos7_huge__%s" | bash"""),
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+ephemeral+centos7+huge+x86_64+rebootable&nodename=centos7_huge__%s" | bash"""),
         'keyname': keyname,
         'image_name': 'Centos 7',
         'size': 'hg-30-ssd',
@@ -165,7 +165,7 @@ nodes = {
     },
     'ceph_build_xenial': {
         'script': dedent("""#!/bin/bash
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+huge+xfs+ceph_build_xenial+x86_64+rebootable&nodename=ceph_build_xenial__%s" | bash"""),
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+ephemeral+huge+xfs+ceph_build_xenial+x86_64+rebootable&nodename=ceph_build_xenial__%s" | bash"""),
         'keyname': keyname,
         'image_name': 'Ubuntu 16.04',
         'size': 'hg-30-ssd',
