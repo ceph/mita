@@ -78,11 +78,14 @@ def is_stuck(string):
 
     def offline_node_label_summary(string): return string.startswith('There are no nodes')
 
+    def node_does_not_have_label(string): return u"doesn\u2019t have label" in string
+
     for summary in [
         busy_summary,
         offline_label_summary,
         offline_node_summary,
-        offline_node_label_summary
+        offline_node_label_summary,
+        node_does_not_have_label
     ]:
         if summary(string) is True:
             return True
@@ -99,7 +102,8 @@ def match_node(string):
     offline_label_summary = lambda string: from_offline_label if string.startswith('All nodes of label') else None
     offline_node_summary = lambda string: from_offline_node if string.endswith('is offline') else None
     offline_node_label_summary = lambda string: from_offline_node_label if string.startswith('There are no nodes') else None
-    for summary in [busy_summary, offline_label_summary, offline_node_summary, offline_node_label_summary]:
+    node_does_not_have_label = lambda string: from_node_without_label if u"doesn\u2019t have label" in string else None
+    for summary in [busy_summary, offline_label_summary, offline_node_summary, offline_node_label_summary, node_does_not_have_label]:
         processor = summary(string)
         if processor:
             return processor(string)
@@ -234,6 +238,22 @@ def from_offline_executor(node):
         node = node.split('__')[0]
         match = node if node in configured_nodes else None
     return match
+
+
+def from_node_without_label(string):
+    """
+    String to process::
+
+        u"... {0} doesn\u2019t have label ..."
+    """
+    messages = string.split(';')
+    for message in messages:
+        if u"doesn\u2019t have label" in message:
+            node = from_label(message)
+            if not node:
+                continue
+            return node
+    logger.warning('tried to match a node without label but failed')
 
 
 def match_node_from_label(label, configured_nodes=None):
