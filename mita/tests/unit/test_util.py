@@ -15,6 +15,12 @@ BecauseNodeIsOffline = "%s is offline"
 # in logic
 BecauseNodeLabelIsOffline = u"There are no nodes with the label \u2018%s\u2019"
 
+# This is another special case where it is not necessarily a reason for being stuck, but
+# can get the queue stuck. In Jenkins's source it is specified as a property of a Node:
+#
+#     Node.LabelMissing={0} doesn\u2019t have label {1}
+BecauseLabelIsMissing = u"%s doesn\u2019t have label %s"
+
 
 class TestFromLabel(object):
 
@@ -138,6 +144,40 @@ class TestFromOfflineNodeLabel(object):
     def test_single_label_matches(self):
         msg = BecauseNodeLabelIsOffline % "x86_64"
         assert util.from_offline_node_label(msg) == 'centos'
+
+
+class TestLabelIsMissing(object):
+
+    def setup(self):
+        self.default_conf = {
+            'nodes': {'centos6': {'labels': ['x86_64', 'small']}},
+            'jenkins': {
+                'url': 'http://jenkins.example.com',
+                'user': 'alfredo',
+                'token': 'secret'},
+        }
+        set_config(self.default_conf, overwrite=True)
+        self.msg = BecauseLabelIsMissing % ('node', 'x86_64&&big')
+
+    def test_does_not_match_a_node(self):
+        assert util.from_node_without_label(self.msg) is None
+
+    def test_matches_a_node(self):
+        msg = BecauseLabelIsMissing % ('centos6', 'x86_64&&small')
+        assert util.from_node_without_label(msg) == 'centos6'
+
+    def test_does_not_match_a_node_with_combined_messages(self):
+        node_labels = [("%snode" % i, 'small&&ovh') for i in range(10)]
+        api_message = ';'.join([BecauseLabelIsMissing % i for i in node_labels])
+        assert util.from_node_without_label(api_message) is None
+
+    def test_matches_a_node_with_combined_messages(self):
+        node_labels = [("%snode" % i, 'small&&ovh') for i in range(10)]
+        offline_nodes = ["%snode" % i for i in range(12,20)]
+        offline_msg = ';'.join([BecauseNodeIsOffline % i for i in offline_nodes])
+        node_msg = ';'.join([BecauseLabelIsMissing % i for i in node_labels])
+        api_message = "%s;%s;%s" % (offline_msg, node_msg, BecauseLabelIsMissing % ('centos6', 'small&&x86_64'))
+        assert util.from_node_without_label(api_message) == 'centos6'
 
 
 class TestMatchNode(object):
