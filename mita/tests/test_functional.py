@@ -1,5 +1,3 @@
-from unittest import TestCase
-from webtest import TestApp
 from mita.tests import FunctionalTest
 
 

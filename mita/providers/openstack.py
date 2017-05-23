@@ -176,10 +176,15 @@ def destroy_node(**kw):
     nodes = driver.list_nodes()
     for node in nodes:
         if node.name == name:
-            driver.destroy_node(node)
-            # also destroy any associated volumes
-            destroy_volume(name)
-            return
+            try:
+                result = driver.destroy_node(node)
+                if not result:
+                    raise RuntimeError('API failed to destroy node: %s', name)
+                destroy_volume(name)
+                return
+            except Exception:
+                logger.exception('unable to destroy_node: %s', name)
+                raise
 
     raise CloudNodeNotFound
 
