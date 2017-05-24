@@ -92,7 +92,7 @@ nodes = {
         'script': dedent("""#!/bin/bash
         apt-get install -y python-simplejson
         apt-get install -y python
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave_libvirt/?token={{ jenkins_prado_token }}&executors=1&labels=ceph_ansible_pr_xenial+libvirt+vagrant&nodename=ceph_ansible_pr_xenial__%s" | bash
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave_libvirt/?token={{ jenkins_prado_token }}&executors=1&labels=python3+ceph_ansible_pr_xenial+libvirt+vagrant&nodename=ceph_ansible_pr_xenial__%s" | bash
         """),
         'keyname': keyname,
         'image_name': 'Ubuntu 16.04',
@@ -192,7 +192,7 @@ nodes = {
     'ceph_build_xenial': {
         'script': dedent("""#!/bin/bash
         apt-get install -y python-simplejson
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=amd64+huge+xfs+ceph_build_xenial+x86_64+rebootable&nodename=ceph_build_xenial__%s" | bash"""),
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=python3+amd64+huge+xfs+ceph_build_xenial+x86_64+rebootable&nodename=ceph_build_xenial__%s" | bash"""),
         'keyname': keyname,
         'image_name': 'Ubuntu 16.04',
         'size': 'hg-30-ssd',
