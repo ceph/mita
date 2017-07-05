@@ -241,14 +241,13 @@ def check_orphaned():
                 provider.destroy_node(name=node.cloud_name)
             except CloudNodeNotFound:
                 logger.info("cloud was not found on provider: %s", node.cloud_name)
-                pass
+                logger.info("will remove node from database, API confirms it no longer exists")
+                node.delete()
+                models.commit()
             except Exception:
                 logger.exception("unable to destroy node: %s", node.cloud_name)
                 logger.error("will skip database removal")
                 continue
-            node.delete()
-            models.commit()
-            logger.info("removed useless node from provider and database: %s", node)
 
     # providers can purge nodes in error state too, try to prune those as well
     for provider_name in conf.provider.keys():
