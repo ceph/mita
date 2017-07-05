@@ -43,6 +43,27 @@ def get_driver():
     return driver
 
 
+def purge():
+    """
+    Get rid of nodes in Error state
+    """
+    driver = get_driver()
+    nodes = driver.list_nodes()
+    logger.info('looking for nodes in error state for removal')
+    destroyed = 0
+    for node in nodes:
+        # XXX this '7' state might be custom to OVH, it means node
+        # came up in error state
+        if node.state == 7:
+            destroyed += 1
+            logger.info('destroying node in error state: %s', str(node))
+            node.destroy()
+    if destroyed:
+        logger.warning('%s nodes destroyed that were found in error state' % destroyed)
+        return True
+    logger.info('no nodes found in error state, nothing was destroyed')
+
+
 def create_node(**kw):
     name = kw['name']
     driver = get_driver()
