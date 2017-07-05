@@ -250,7 +250,8 @@ def check_orphaned():
                 continue
 
     # providers can purge nodes in error state too, try to prune those as well
-    for provider_name in pecan.conf.provider.keys():
+    providers_conf =  pecan.conf.provider.to_dict()
+    for provider_name in providers_conf.keys():
         provider = providers.get(provider_name)
         provider.purge()
 
