@@ -208,7 +208,6 @@ def check_queue():
         requests.post(node_endpoint, data=json.dumps(configured_node))
 
 
-
 @app.task
 def check_orphaned():
     """
@@ -250,6 +249,11 @@ def check_orphaned():
             node.delete()
             models.commit()
             logger.info("removed useless node from provider and database: %s", node)
+
+    # providers can purge nodes in error state too, try to prune those as well
+    for provider_name in conf.provider.keys():
+        provider = providers.get(provider_name)
+        provider.purge()
 
 
 def get_mita_api(endpoint=None, *args):
