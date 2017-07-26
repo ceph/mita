@@ -79,7 +79,7 @@ nodes = {
     'ceph_ansible_pr_trusty': {
         'script': dedent("""#!/bin/bash
         apt-get install -y python-simplejson
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&executors=1&labels=ceph_ansible_pr_trusty&nodename=ceph_ansible_pr_trusty__%s" | bash
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave_libvirt/?token={{ jenkins_prado_token }}&executors=1&labels=ceph_ansible_pr_trusty&nodename=ceph_ansible_pr_trusty__%s" | bash
         """),
         'keyname': keyname,
         'image_name': 'Ubuntu 16.04',
