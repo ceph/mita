@@ -45,9 +45,8 @@ def configure_celery_logging():
             logging['version'] = 1
         load_logging_config(logging)
 
-
 @worker_init.connect
-def bootstrap_pecan(signal, sender):
+def bootstrap_pecan(signal, sender, **kw):
     try:
         config_path = os.environ['PECAN_CONFIG']
     except KeyError:
