@@ -82,7 +82,17 @@ def create_node(**kw):
     storage = kw.get("storage")
 
     size = available_sizes[0]
-    image = [i for i in images if i.name == kw['image_name']][0]
+    matching_images = [i for i in images if i.name == kw['image_name']]
+
+    if not matching_images:
+        logger.error("provider does not have a matching 'image_name' for %s", kw['image_name'])
+        logger.error(
+            "no vm will be created. Ensure that '%s' is an available image and that it exists",
+            kw['image_name']
+        )
+        return
+
+    image = matching_images[0]
 
     try:
         new_node = driver.create_node(
