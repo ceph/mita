@@ -1,8 +1,7 @@
 ---
-
 # install python2.7 on xenial nodes
 - hosts: all
-  sudo: yes
+  become: true
   user: vagrant
   gather_facts: false
   tasks:
@@ -12,6 +11,7 @@
       failed_when: false
 
 - hosts: all
+  become: true
   user: vagrant
   roles:
     - common

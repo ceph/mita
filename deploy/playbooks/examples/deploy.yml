@@ -1,8 +1,8 @@
 ---
 # install python2.7 on xenial nodes
 - hosts: all
-  sudo: yes
-  user: admin 
+  become: true
+  user: admin
   gather_facts: false
   tasks:
     - name: install python-simplejson
@@ -11,6 +11,7 @@
       failed_when: false
 
 - hosts: all
+  become: true
   user: admin
   roles:
     - common
