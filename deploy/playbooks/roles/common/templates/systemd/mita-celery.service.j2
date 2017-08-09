@@ -1,0 +1,19 @@
+# {{ ansible_managed }}
+[Unit]
+Description=mita celery service
+After=network.target rabbitmq-server.service
+Requires=rabbitmq-server.service
+
+[Service]
+Type=forking
+EnvironmentFile=/etc/default/mita
+User={{ ansible_ssh_user }}
+WorkingDirectory={{ app_home }}/src/{{ app_name }}/{{ app_name }}
+StandardOutput=journal
+StandardError=journal
+ExecStart={{ app_home }}/bin/celery multi start mita -A async -l INFO --logfile=/var/log/celery/%n%I.log
+ExecStop={{ app_home }}/bin/celery multi stopwait mita --pidfile=%n.pid
+ExecReload={{ app_home }}/bin/celery multi restart mita -A async -l INFO --logfile=/var/log/celery/%n%I.log
+
+[Install]
+WantedBy=multi-user.target
