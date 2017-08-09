@@ -23,14 +23,6 @@
     update_cache: yes
   sudo: yes
 
-- name: install ssl system requirements
-  sudo: yes
-  apt: name={{ item }} state=present
-  with_items: ssl_requirements
-  when: app_use_ssl
-  tags:
-    - packages
-
 - name: install system packages
   sudo: yes
   apt: name={{ item }} state=present
@@ -83,7 +75,3 @@
 - include: systemd.yml
   tags:
     - systemd
-
-- include: nginx.yml
-  tags:
-    - nginx

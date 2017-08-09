@@ -16,7 +16,3 @@
 - name: restart mita-celerybeat
   service: name=mita-celerybeat state=restarted enabled=yes
   sudo: yes
-
-- name: restart nginx
-  sudo: yes
-  action: service name=nginx state=restarted

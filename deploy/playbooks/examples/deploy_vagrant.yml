@@ -20,14 +20,12 @@
      prod_fqdn: "mita.local"
      fqdn: "2.node.a"
      short_hostname: "node2"
-     use_ssl: true
      wsgi_file: wsgi.py
      wsgi_callable: application
      ansible_ssh_port: 22
      restart_app: true
      branch: "master"
      development_server: true
-     self_signed_ssl: true
      # All these below are required on the first deploy
      # and if provided will create configuration files
      # used by mita
