@@ -183,7 +183,7 @@ class NodesController(object):
                 difference = now - n.created
                 if difference.seconds < 360:  # 6 minutes
                     already_created_nodes += 1
-            if already_created_nodes > count:
+            if already_created_nodes >= count:
                 logger.info('job needs %s nodes to get unstuck', count)
                 logger.info(
                     'but there are %s node(s) already created 6 minutes ago',
