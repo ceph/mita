@@ -1,22 +1,22 @@
 ---
 
 - name: reload systemd
-  sudo: yes
-  sudo: yes
   command: systemctl daemon-reload
 
 - name: restart app
-  sudo: yes
-  service: name=mita state=restarted enabled=yes
+  service:
+    name: mita
+    state: restarted
+    enabled: yes
 
 - name: restart mita-celery
-  service: name=mita-celery state=restarted enabled=yes
-  sudo: yes
+  service:
+    name: mita-celery
+    state: restarted
+    enabled: yes
 
 - name: restart mita-celerybeat
-  service: name=mita-celerybeat state=restarted enabled=yes
-  sudo: yes
-
-- name: restart nginx
-  sudo: yes
-  action: service name=nginx state=restarted
+  service:
+    name: mita-celerybeat
+    state: restarted
+    enabled: yes

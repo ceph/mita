@@ -1,52 +1,51 @@
 ---
 - name: "Build hosts file"
-  sudo: yes
   template:
     src: hosts.j2
     dest: "/etc/hosts"
 
 - name: Set Hostname with hostname command
-  sudo: yes
-  hostname: name="{{ short_hostname }}"
+  hostname:
+    name: "{{ short_hostname }}"
   when: short_hostname is defined
 
 - name: "ensure a home for {{ app_name }}"
-  sudo: yes
-  file: path={{ app_home }} owner={{ ansible_ssh_user }} group={{ ansible_ssh_user }} state=directory recurse=yes
+  file:
+    path: "{{ app_home }}"
+    owner: "{{ ansible_ssh_user }}"
+    group: "{{ ansible_ssh_user }}"
+    state: directory
+    recurse: yes
   register: app_home_created
 
 # rabbitmq must be installed after the hostname is set
 - include: rabbitmq.yml
 
-- name: Update apt cache
-  apt:
-    update_cache: yes
-  sudo: yes
-
-- name: install ssl system requirements
-  sudo: yes
-  apt: name={{ item }} state=present
-  with_items: ssl_requirements
-  when: app_use_ssl
-  tags:
-    - packages
-
 - name: install system packages
-  sudo: yes
-  apt: name={{ item }} state=present
-  with_items: system_packages
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  with_items: "{{ system_packages }}"
   tags:
     - packages
 
 - name: Create a virtualenv with latest pip.
-  pip: name=pip virtualenv={{ app_home }} extra_args='--upgrade'
+  pip:
+    name: pip
+    virtualenv: "{{ app_home }}"
+    extra_args: '--upgrade'
 
 - name: "pip+git install {{ app_name }} into virtualenv."
-  pip: name='git+https://github.com/alfredodeza/mita@{{ branch }}#egg=mita' virtualenv={{ app_home }}
+  pip:
+    name: 'git+https://github.com/ceph/mita@{{ branch }}#egg=mita'
+    virtualenv: "{{ app_home }}"
   changed_when: False
 
 - name: create the prod config file
-  action: template src=../templates/prod.py.j2 dest={{ app_home }}/src/{{ app_name }}/prod.py
+  template:
+    src: prod.py.j2
+    dest: "{{ app_home }}/src/{{ app_name }}/prod.py"
 
 - name: create the prod jenkins config file
   template:
@@ -84,6 +83,10 @@
   tags:
     - systemd
 
-- include: nginx.yml
-  tags:
-    - nginx
+- name: "ensure {{ app_home }} is owned by {{ ansible_ssh_user }}"
+  file:
+    path: "{{ app_home }}"
+    owner: "{{ ansible_ssh_user }}"
+    group: "{{ ansible_ssh_user }}"
+    state: directory
+    recurse: yes
