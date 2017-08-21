@@ -2,7 +2,7 @@ psycopg2
 gunicorn
 pecan
 sqlalchemy
-celery[librabbitmq]
+celery
 alembic
 python-jenkins
 requests

@@ -60,7 +60,7 @@ def bootstrap_pecan(signal, sender, **kw):
     models.init_model()
 
 
-app = Celery('mita.async', broker='amqp://guest@localhost//', include=['mita.tasks'])
+app = Celery('mita.async', broker='pyamqp://guest@localhost//', include=['mita.tasks'])
 
 
 @app.task
