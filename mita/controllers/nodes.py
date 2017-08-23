@@ -56,17 +56,27 @@ class NodeController(object):
             # `idle` is a property that will only be true-ish if idle_since has
             # been set.
             difference = now - self.node.idle_since
+
             if difference.seconds > 1200:  # 20 minutes
+                # talk to Jenkins again, make sure this node didn't get picked
+                # up on its way here
+                conn = jenkins_connection()
+                if conn.node_exists(self.node.jenkins_name):
+                    if conn.get_node_info(self.node.jenkins_name).get('idle'):
+                        logger.info("[jenkins] removing node: %s" % self.node.jenkins_name)
+                        conn.delete_node(self.node.jenkins_name)
+                    else:
+                        logger.warning(
+                            'skipping deletion of node, no longer idle: %s',
+                            self.node.jenkins_name
+                        )
+                        return
                 # we need to terminate this couch potato
-                logger.info("Destroying node: %s" % self.node.cloud_name)
+                logger.info("[cloud] destroying node: %s" % self.node.cloud_name)
                 try:
                     provider.destroy_node(name=self.node.cloud_name)
                 except CloudNodeNotFound:
                     logger.info("node does not exist in cloud provider")
-                conn = jenkins_connection()
-                if conn.node_exists(self.node.jenkins_name):
-                    logger.info("Deleting node in jenkins: %s" % self.node.jenkins_name)
-                    conn.delete_node(self.node.jenkins_name)
                 # delete from our database
                 self.node.delete()
 
