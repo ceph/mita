@@ -26,6 +26,17 @@ def config_file():
     return os.path.join(here, 'config.py')
 
 
+class fake_jenkins(object):
+    def get_node_config(self, *a):
+        return """<?xml version="1.0" encoding="UTF-8"?><slave></slave>"""
+
+    def __getattr__(self, *a):
+        return self
+
+    def __call__(self, *a, **kw):
+        return {}
+
+
 @pytest.fixture(autouse=True)
 def no_jenkins_requests(monkeypatch):
     """
@@ -33,15 +44,6 @@ def no_jenkins_requests(monkeypatch):
     test uses it, then you are bound to this dictatorial patching, preventing
     from making actual connections.
     """
-    class fake_jenkins(object):
-        def get_node_config(self, *a):
-            return """<?xml version="1.0" encoding="UTF-8"?><slave></slave>"""
-
-        def __getattr__(self, *a):
-            return self
-
-        def __call__(self, *a, **kw):
-            return {}
     monkeypatch.setattr("jenkins.Jenkins", lambda *a: fake_jenkins())
 
 
@@ -61,7 +63,7 @@ def no_openstack_destroy_node_requests(monkeypatch):
     test uses it, then you are bound to this dictatorial patching, preventing
     from making actual connections.
     """
-    monkeypatch.setattr("mita.providers.openstack.create_node", lambda **kw: True)
+    monkeypatch.setattr("mita.providers.openstack.destroy_node", lambda **kw: True)
 
 
 
