@@ -52,9 +52,13 @@ def purge():
     logger.info('looking for nodes in error state for removal')
     destroyed = 0
     for node in nodes:
-        # XXX this '7' state might be custom to OVH, it means node
-        # came up in error state
-        if node.state == 7:
+        # it used to be the case that 'state' would be an integer, and that
+        # OVH would slap a 7 for a node in ERROR. Somehow the __repr__ of the object
+        # will contain that, so try that too
+        error_integer = node.state == 7
+        error_repr = 'state=ERROR' in str(node)
+        error_string = node.state == 'error'
+        if error_integer or error_repr or error_string:
             destroyed += 1
             logger.info('destroying node in error state: %s', str(node))
             node.destroy()
