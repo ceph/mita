@@ -101,13 +101,13 @@ nodes = {
         'labels': ['amd64', 'x86_64', 'centos6', 'huge', 'rebootable'],
         'provider': 'openstack'
     },
-    'ceph_ansible_pr_centos7': {
+    'ceph_ansible_docker_centos7': {
         'script': dedent("""#!/bin/bash
         curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave_libvirt/?token={{ jenkins_prado_token }}&api_uri={{ jenkins_url }}&jenkins_credentials_uuid={{ jenkins_credentials_uuid }}&executors=1&labels=ceph_ansible_pr_centos7+vagrant+libvirt&nodename=ceph_ansible_pr_centos7__%s" | bash"""),
         'keyname': keyname,
         'image_name': 'Centos 7',
         'size': 'hg-30-flex',
-        'labels': ['vagrant', 'ceph-ansible'],
+        'labels': ['vagrant', 'libvirt', 'centos7'],
         'provider': 'openstack'
     },
     'centos7_small': {
