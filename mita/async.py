@@ -7,6 +7,7 @@ import json
 import os
 import logging
 import warnings
+from sqlalchemy.exc import InvalidRequestError
 from mita import util, models, connections, providers
 from mita.exceptions import CloudNodeNotFound
 from celery.signals import worker_init
@@ -251,7 +252,13 @@ def check_orphaned():
     database and the provider.
     """
     conn = connections.jenkins_connection()
-    nodes = models.Node.query.all()
+    try:
+        nodes = models.Node.query.all()
+    except InvalidRequestError:
+        logger.exception('could not list nodes')
+        models.rollback()
+        # we can try again at the next scheduled task run
+        return
 
     for node in nodes:
         # it is all good if this node exists in Jenkins. That is the whole
