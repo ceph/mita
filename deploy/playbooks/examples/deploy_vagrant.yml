@@ -1,5 +1,5 @@
 ---
-# install python2.7 on xenial nodes
+# install python2.7 on >= xenial nodes
 - hosts: all
   become: true
   user: vagrant
