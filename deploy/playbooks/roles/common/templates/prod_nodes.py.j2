@@ -70,7 +70,7 @@ nodes = {
         'script': dedent("""#!/bin/bash
         apt-get update
         apt-get install -y python-simplejson
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&api_uri={{ jenkins_url }}&jenkins_credentials_uuid={{ jenkins_credentials_uuid }}&executors=1&labels=trusty+amd64+huge+xenial+jessie+stretch+x86_64+rebootable+trusty-pbuilder&nodename=xenial_trusty_pbuilder_huge__%s" | bash
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&api_uri={{ jenkins_url }}&jenkins_credentials_uuid={{ jenkins_credentials_uuid }}&executors=1&labels=trusty+amd64+huge+xenial+jessie+stretch+x86_64+rebootable+trusty-pbuilder+bionic&nodename=xenial_trusty_pbuilder_huge__%s" | bash
         """),
         'keyname': keyname,
         'image_name': 'Ubuntu 16.04',
@@ -82,7 +82,7 @@ nodes = {
         'script': dedent("""#!/bin/bash
         apt-get update
         apt-get install -y python-simplejson
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&api_uri={{ jenkins_url }}&jenkins_credentials_uuid={{ jenkins_credentials_uuid }}&executors=1&labels=xenial+amd64+trusty+huge+x86_64+rebootable+rebootable&nodename=trusty_huge__%s" | bash
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&api_uri={{ jenkins_url }}&jenkins_credentials_uuid={{ jenkins_credentials_uuid }}&executors=1&labels=xenial+amd64+trusty+huge+x86_64+rebootable+rebootable+bionic&nodename=trusty_huge__%s" | bash
         """),
         'keyname': keyname,
         'image_name': 'Ubuntu 16.04',
