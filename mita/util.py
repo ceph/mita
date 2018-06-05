@@ -337,6 +337,7 @@ def get_node_labels(node_name, _xml_configuration=None):
     right tag and extracting the labels from there.
     """
     conn = jenkins_connection()
+    node_name = node_name.encode('ascii', errors='ignore')
     try:
         xml_configuration = _xml_configuration or conn.get_node_config(node_name)
     except JenkinsNotFoundException:

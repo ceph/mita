@@ -226,6 +226,17 @@ class TestGetNodeLabels(object):
     def setup(self):
         util.jenkins_connection = lambda: None
 
+    def test_unicode_does_not_barf(self, monkeypatch):
+        class FakeConn(object):
+            def get_node_config(self, node_name):
+                    str(node_name)
+                    return '<slave></slave>'
+
+        monkeypatch.setattr('mita.util.jenkins_connection', lambda: FakeConn())
+        name = u'\u2018vagrant\u2019'
+        result = util.get_node_labels(name)
+        assert result == []
+
     def test_get_no_node_labels(self):
         result = util.get_node_labels('trusty', _xml_configuration='<slave></slave>')
         assert result == []
