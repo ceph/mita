@@ -57,7 +57,7 @@ class NodeController(object):
             # been set.
             difference = now - self.node.idle_since
 
-            if difference.seconds > 1200:  # 20 minutes
+            if difference.seconds > 2400:  # 40 minutes
                 # talk to Jenkins again, make sure this node didn't get picked
                 # up on its way here
                 conn = jenkins_connection()
