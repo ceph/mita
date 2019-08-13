@@ -190,7 +190,7 @@ def check_queue():
                         conn.get_job_info(job_name)
                         logger.info("Job info found for: %s", job_name)
                         node_name = util.match_node_from_job_config(job_url)
-                    except jenkins.NotFoundException:
+                    except jenkins.JenkinsException:
                         logger.warning('No job info found for: %s', job_name)
                         logger.warning('Will assume the job is a matrix job')
                         node_name = util.match_node_from_matrix_job_name(job_name)
