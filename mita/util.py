@@ -14,6 +14,19 @@ from mita.label_eval import matching_nodes
 logger = logging.getLogger(__name__)
 
 
+def sanitize_string(string, strip=False):
+    """
+    Remove all surrounding whitespace, and all utf-8 chars that are usually
+    present coming from Jenkins
+    """
+    to_remove = [u'\u2018', u'\u2019']
+    for i in to_remove:
+        string = string.replace(i, '')
+    if strip:
+        string = string.strip()
+    return string
+
+
 def job_from_url(url):
     """
     Infer the ``job_name`` from a Jenkins url
@@ -119,12 +132,17 @@ def from_label(string):
     String to process::
 
         "Waiting for next available executor on {0}"
+
+    .. note:: Although initially this function was to process a distinct type
+    of string, it is being used as a generic utility function to parse other
+    strings, this is why the ``string`` needs to be sanitized before
+    processing.
     """
     try:
         node_or_label = string.split()[-1]
     except IndexError:
         return None
-
+    node_or_label = sanitize_string(node_or_label)
     node_from_label = match_node_from_label(node_or_label)
     configured_nodes = get_nodes()
     # node_or_label can be a node as a key in the config, so try to get that
@@ -172,9 +190,7 @@ def from_offline_node_label(string):
 
         u"There are no nodes with the label \u2018{0}\u2019"
     """
-    to_remove = [u'\u2018', u'\u2019']
-    for i in to_remove:
-        string = string.replace(i, '')
+    string = sanitize_string(string)
     label = string.split()[-1]
     matched_node = match_node_from_label(label)
     if matched_node is None:
@@ -192,9 +208,7 @@ def from_offline_label(string):
         u"All nodes of label \u2018{0}\u2019 are offline"
     """
     # effing unicode to have nice cute quotes in the UI
-    to_remove = [u'\u2018', u'\u2019']
-    for i in to_remove:
-        string = string.replace(i, '')
+    string = sanitize_string(string)
     label = string.split()[-3]
     # first check if we get a match from a single label, e.g. 'amd64'
     single_label_match = match_node_from_label(label)

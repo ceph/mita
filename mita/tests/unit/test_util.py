@@ -7,7 +7,7 @@ from mita import util
 
 from mock import patch, MagicMock
 
-BecauseNodeIsBusy = 'Waiting for next available executor on %s'
+BecauseNodeIsBusy = 'Waiting for next available executor on \u2018%s\u2019'
 BecauseLabelIsBusy = BecauseNodeIsBusy
 BecauseLabelIsOffline = u"All nodes of label \u2018%s\u2019 are offline"
 BecauseNodeIsOffline = "%s is offline"
@@ -26,7 +26,7 @@ class TestFromLabel(object):
 
     def setup(self):
         self.default_conf = {
-            'nodes': {'wheezy': {'labels': ['amd64']}},
+            'nodes': {'wheezy': {'labels': ['amd64', 'huge']}},
             'jenkins': {
                 'url': 'http://jenkins.example.com',
                 'user': 'alfredo',
@@ -65,6 +65,10 @@ class TestFromLabel(object):
     def test_no_match_with_plus_sign_from_name(self):
         msg = BecauseNodeIsBusy % 'centos6__192.168.1.12'
         assert util.from_label(msg) is None
+
+    def test_label_is_busy_unicode(self):
+        msg = BecauseLabelIsBusy % 'huge&&amd64'
+        assert util.from_label(msg) == 'wheezy'
 
 
 class TestOfflineLabel(object):
