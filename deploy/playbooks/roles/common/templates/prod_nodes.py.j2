@@ -146,6 +146,17 @@ nodes = {
         'labels': ['ceph_build_xenial', 'amd64', 'x86_64', 'xfs', 'huge', 'rebootable', 'python3'],
         'provider': 'openstack'
     },
+    'leap15_huge': {
+        'script': dedent("""#!/bin/bash
+        zypper -n ref
+        zypper -n install python python-xml
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&api_uri={{ jenkins_url }}&jenkins_credentials_uuid={{ jenkins_credentials_uuid }}&executors=1&osc_user={{ osc_user }}&osc_pass={{ osc_pass }}&labels=x86_64+amd64+huge+leap15&nodename=leap15_huge__%s" | bash"""),
+        'keyname': keyname,
+        'image_name': 'opensuse-15.1',
+        'size': 'hg-30-ssd',
+        'labels': ['leap15', 'huge', 'amd64', 'x86_64'],
+        'provider': 'openstack'
+    },
     '__force_dict__': True
 
 }
