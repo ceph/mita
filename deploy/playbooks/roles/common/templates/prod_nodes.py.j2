@@ -147,6 +147,18 @@ nodes = {
         'labels': ['amd64', 'x86_64', 'centos7', 'huge', 'rebootable'],
         'provider': 'openstack'
     },
+    'centos8_huge': {
+        'script': dedent("""#!/bin/bash
+        yum install -y python2
+        ln -s /usr/bin/python2 /usr/bin/python
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&api_uri={{ jenkins_url }}&jenkins_credentials_uuid={{ jenkins_credentials_uuid }}&executors=1&labels=amd64+centos8+huge+x86_64+rebootable&ansible_python_interpreter=/usr/bin/python3&nodename=centos8_huge__%s" | bash
+        rm -f /usr/bin/python"""),
+        'keyname': keyname,
+        'image_name': 'centos8-cloud',
+        'size': 'hg-30-ssd',
+        'labels': ['amd64', 'x86_64', 'centos8', 'huge', 'rebootable'],
+        'provider': 'openstack'
+    },
     'ceph_build_xenial': {
         'script': dedent("""#!/bin/bash
         apt-get update
