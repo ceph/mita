@@ -26,7 +26,7 @@ nodes = {
         """),
         'keyname': keyname,
         'image_name': 'Ubuntu 16.04',
-        'size': 'c2-30-flex',
+        'size': 'c2-30',
         'labels': ['ceph_ansible_pr_xenial'],
         'provider': 'openstack'
     },
@@ -38,7 +38,7 @@ nodes = {
         """),
         'keyname': keyname,
         'image_name': 'Ubuntu 17.04',
-        'size': 'c2-30-flex',
+        'size': 'c2-30',
         'labels': ['ceph_ansible_pr_zesty', 'libvirt', 'vagrant', 'python3'],
         'provider': 'openstack'
     },
@@ -130,7 +130,7 @@ nodes = {
         curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave_libvirt/?token={{ jenkins_prado_token }}&api_uri={{ jenkins_url }}&jenkins_credentials_uuid={{ jenkins_credentials_uuid }}&executors=1&labels=centos7+vagrant+libvirt&nodename=ceph_ansible_docker_centos7__%s" | bash"""),
         'keyname': keyname,
         'image_name': 'Centos 7.4',
-        'size': 'c2-30-flex',
+        'size': 'c2-30',
         'labels': ['vagrant', 'libvirt', 'centos7'],
         'provider': 'openstack'
     },
