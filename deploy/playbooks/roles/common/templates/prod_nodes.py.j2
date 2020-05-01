@@ -136,6 +136,7 @@ nodes = {
     },
     'centos7_small': {
         'script': dedent("""#!/bin/bash
+        yum install -y epel-release
         yum install -y ansible
         curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&api_uri={{ jenkins_url }}&jenkins_credentials_uuid={{ jenkins_credentials_uuid }}&executors=1&labels=amd64+centos7+small+x86_64+rebootable&nodename=centos7_small__%s" | bash"""),
         'keyname': keyname,
