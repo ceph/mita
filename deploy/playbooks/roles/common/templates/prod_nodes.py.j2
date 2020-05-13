@@ -126,6 +126,7 @@ nodes = {
     },
     'ceph_ansible_docker_centos7': {
         'script': dedent("""#!/bin/bash
+        yum install -y epel-release
         yum install -y ansible
         curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave_libvirt/?token={{ jenkins_prado_token }}&api_uri={{ jenkins_url }}&jenkins_credentials_uuid={{ jenkins_credentials_uuid }}&executors=1&labels=centos7+vagrant+libvirt&nodename=ceph_ansible_docker_centos7__%s" | bash"""),
         'keyname': keyname,
@@ -147,6 +148,7 @@ nodes = {
     },
     'centos7_huge': {
         'script': dedent("""#!/bin/bash
+        yum install -y epel-release
         yum install -y ansible
         curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&api_uri={{ jenkins_url }}&jenkins_credentials_uuid={{ jenkins_credentials_uuid }}&executors=1&labels=amd64+centos7+huge+x86_64+rebootable&nodename=centos7_huge__%s" | bash"""),
         'keyname': keyname,
