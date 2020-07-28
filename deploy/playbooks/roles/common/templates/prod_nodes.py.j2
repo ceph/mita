@@ -170,6 +170,17 @@ nodes = {
         'labels': ['amd64', 'x86_64', 'centos8', 'huge', 'rebootable'],
         'provider': 'openstack'
     },
+    'centos7_gigantic': {
+        'script': dedent("""#!/bin/bash
+        yum install -y epel-release
+        yum install -y ansible
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&api_uri={{ jenkins_url }}&jenkins_credentials_uuid={{ jenkins_credentials_uuid }}&executors=1&labels=amd64+centos7+gigantic+x86_64+rebootable&nodename=centos7_gigantic__%s" | bash"""),
+        'keyname': keyname,
+        'image_name': 'Centos 7.4',
+        'size': 'c2-120',
+        'labels': ['amd64', 'x86_64', 'centos7', 'huge', 'rebootable', 'gigantic'],
+        'provider': 'openstack'
+    },
     'ceph_build_xenial': {
         'script': dedent("""#!/bin/bash
         add-apt-repository -y ppa:ansible/ansible
