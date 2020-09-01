@@ -22,7 +22,7 @@ nodes = {
         add-apt-repository -y ppa:ansible/ansible
         apt-get update
         apt-get install -y python python-simplejson ansible
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave_libvirt/?token={{ jenkins_prado_token }}&api_uri={{ jenkins_url }}&jenkins_credentials_uuid={{ jenkins_credentials_uuid }}&executors=1&labels=python3+ceph_ansible_pr_xenial+libvirt+vagrant&nodename=ceph_ansible_pr_xenial__%s" | bash
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&api_uri={{ jenkins_url }}&jenkins_credentials_uuid={{ jenkins_credentials_uuid }}&executors=1&labels=python3+ceph_ansible_pr_xenial+libvirt+vagrant&nodename=ceph_ansible_pr_xenial__%s" | bash
         """),
         'keyname': keyname,
         'image_name': 'Ubuntu 16.04',
@@ -34,7 +34,7 @@ nodes = {
         'script': dedent("""#!/bin/bash
         apt-get update
         apt-get install -y python python-simplejson ansible
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave_libvirt/?token={{ jenkins_prado_token }}&api_uri={{ jenkins_url }}&jenkins_credentials_uuid={{ jenkins_credentials_uuid }}&executors=1&labels=python3+ceph_ansible_pr_zesty+libvirt+vagrant&libvirt=true&nodename=ceph_ansible_pr_zesty__%s" | bash
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&api_uri={{ jenkins_url }}&jenkins_credentials_uuid={{ jenkins_credentials_uuid }}&executors=1&labels=python3+ceph_ansible_pr_zesty+libvirt+vagrant&libvirt=true&nodename=ceph_ansible_pr_zesty__%s" | bash
         """),
         'keyname': keyname,
         'image_name': 'Ubuntu 17.04',
@@ -128,7 +128,7 @@ nodes = {
         'script': dedent("""#!/bin/bash
         yum install -y epel-release
         yum install -y ansible
-        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave_libvirt/?token={{ jenkins_prado_token }}&api_uri={{ jenkins_url }}&jenkins_credentials_uuid={{ jenkins_credentials_uuid }}&executors=1&labels=centos7+vagrant+libvirt&libvirt=true&nodename=ceph_ansible_docker_centos7__%s" | bash"""),
+        curl -u {{ prado_user | default('admin') }}:{{ prado_token }} -L "{{ prado_url }}/setup/slave/?token={{ jenkins_prado_token }}&api_uri={{ jenkins_url }}&jenkins_credentials_uuid={{ jenkins_credentials_uuid }}&executors=1&labels=centos7+vagrant+libvirt&libvirt=true&nodename=ceph_ansible_docker_centos7__%s" | bash"""),
         'keyname': keyname,
         'image_name': 'Centos 7.4',
         'size': 'c2-30',
