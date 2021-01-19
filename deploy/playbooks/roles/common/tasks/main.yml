@@ -23,10 +23,9 @@
 
 - name: install system packages
   apt:
-    name: "{{ item }}"
+    name: "{{ system_packages }}"
     state: present
     update_cache: yes
-  with_items: "{{ system_packages }}"
   tags:
     - packages
 
