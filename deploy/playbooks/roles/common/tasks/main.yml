@@ -54,21 +54,21 @@
     src: prod_jenkins.py.j2
     dest: "{{ app_home }}/src/{{ app_name }}/prod_jenkins.py"
   when: (jenkins_user is defined or jenkins_token is defined) or
-        (app_home_created is defined and app_home_created|changed)
+        (app_home_created is defined and app_home_created is changed)
 
 - name: create the prod provider config file
   template:
     src: prod_provider.py.j2
     dest: "{{ app_home }}/src/{{ app_name }}/prod_provider.py"
   when: (provider_user is defined and provider_password is defined) or
-        (app_home_created is defined and app_home_created|changed)
+        (app_home_created is defined and app_home_created is changed)
 
 - name: create the prod nodes config file
   template:
     src: prod_nodes.py.j2
     dest: "{{ app_home }}/src/{{ app_name }}/prod_nodes.py"
   when: (jenkins_prado_token is defined and prado_token is defined) or
-        (app_home_created is defined and app_home_created|changed)
+        (app_home_created is defined and app_home_created is changed)
 
 - name: install python requirements in virtualenv
   pip:
