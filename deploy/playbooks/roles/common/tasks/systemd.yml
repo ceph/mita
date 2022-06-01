@@ -1,12 +1,21 @@
 ---
-
-- name: ensure /var/log/celery dir exists
+- name: ensure /var/{run,log}/celery dirs exists
   file:
-    path: /var/log/celery
+    path: "{{ item }}"
     state: directory
     owner: "{{ ansible_ssh_user }}"
     group: "{{ ansible_ssh_user }}"
     recurse: yes
+  with_items:
+    - /var/log/celery
+    - /var/run/celery
+
+- name: ensure /var/run/celery PID file exists
+  file:
+    path: /var/run/celery/celery.pid
+    state: touch
+    owner: "{{ ansible_ssh_user }}"
+    group: "{{ ansible_ssh_user }}"
 
 - name: ensure /etc/default/ dir exists
   file:
